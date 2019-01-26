@@ -18,9 +18,9 @@
 ## Container base images
 
 | Name | Docker | RHEL Openshift |
-| --- | --- | --- | --- |
+| --- | --- | --- |
 | Apache HTTPD 2.x | [alpine](https://github.com/docker-library/httpd/blob/master/2.4/alpine/Dockerfile) | [rhel](https://access.redhat.com/containers/?tab=images&platform=docker#/registry.access.redhat.com/rhscl/httpd-24-rhel7)  | [examples]()  |
-| ElasticSearch | [alpine](https://github.com/docker-library/elasticsearch/blob/master/5/alpine/Dockerfile) | [roar]()  | [examples]()  | [aws]() |
+| ElasticSearch | [alpine](https://github.com/docker-library/elasticsearch/blob/master/5/alpine/Dockerfile) | [roar]()  | [examples]()  | 
 | MongoDB | [hub]() | [roar]()  | [examples]()  |
 | MySQL | [hub]() | [roar]()  | [examples]()  |
 | NGINX 1.10 | [alpine](https://github.com/nginxinc/docker-nginx/blob/master/mainline/alpine/Dockerfile) | [rhel](https://access.redhat.com/containers/?tab=images&platform=docker#/registry.access.redhat.com/rhscl/nginx-110-rhel7)  | [examples]()  |
