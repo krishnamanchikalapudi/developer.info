@@ -9,3 +9,17 @@
 | OpenShift | [cheat-sheet](http://design.jboss.org/redhatdeveloper/marketing/openshift_cheatsheet/cheatsheet/images/openshift_cheat_sheet_r3v1.pdf) | [videos]()  | [examples]()  | [install]() |
 | Elastic Search | [cheat-sheet](http://elasticsearch-cheatsheet.jolicode.com/) | [videos]()  | [examples]()  | [install]() |
 |  | [cheat-sheet]() | [videos]()  | [examples]()  | [install]() |
+
+
+
+## Container base images
+
+| Name | Docker | RHEL Openshift | AWS | 
+| --- | --- | --- | --- |
+| NGINX | [hub]() | [roar]()  | [examples]()  | [aws]() |
+| Apache HTTPD 2.x | [hub]() | [roar]()  | [examples]()  | [aws]() |
+| NodeJs 10.x | [hub]() | [roar]()  | [examples]()  | [aws]() |
+| NodeJs 8.x | [hub]() | [roar]()  | [examples]()  | [aws]() |
+| OpenJdk 1.8 | [hub]() | [roar]()  | [examples]()  | [aws]() |
+| Redis | [hub]() | [roar]()  | [examples]()  | [aws]() |
+| ElasticSearch | [hub]() | [roar]()  | [examples]()  | [aws]() |
