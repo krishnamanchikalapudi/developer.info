@@ -1,13 +1,13 @@
+| Name | Cheat Sheets | Training videos | Exercise  | Examples | PC Setup | 
+| --- | --- | --- | --- | --- | --- |
+| Docker | [cheat-sheet](https://www.docker.com/sites/default/files/Docker_CheatSheet_08.09.2016_0.pdf) | [videos]  | [start] | [examples](https://github.com/docker/labs/tree/master/developer-tools)  | [install] |
+| Elastic Search | [cheat-sheet](http://elasticsearch-cheatsheet.jolicode.com/) | [videos] | [start] | [examples]  | [install] |
+| GitHub | [cheat-sheet](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf) | [videos] | [start] | [examples]  | [install] |
+| Jenkins | [cheat-sheet] | [videos] | [start] | [examples]  | [install] | 
+| Istio | [cheat-sheet](https://istio.io/docs/reference/commands/istioctl/) | [videos] | [start] | [examples](https://github.com/istio/istio/tree/master/samples)  | [install] |
+| Kubernetes | [cheat-sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/) | [videos](https://learn.openshift.com/servicemesh/) | [start] | [examples](https://github.com/kubernetes/examples)  | [install](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-binary-using-curl) |
+| OpenShift | [cheat-sheet](http://design.jboss.org/redhatdeveloper/marketing/openshift_cheatsheet/cheatsheet/images/openshift_cheat_sheet_r3v1.pdf) | [videos] | [start](https://learn.openshift.com/introduction/getting-started/) | [examples](https://github.com/RedHatWorkshops/openshiftv3-workshop)  | [install] |
 
-
-| Name | Cheat Sheets | Training videos | Examples | PC Setup | 
-| --- | --- | --- | --- | --- |
-| Docker | [cheat-sheet](https://www.docker.com/sites/default/files/Docker_CheatSheet_08.09.2016_0.pdf) | [videos]()  | [examples]()  | [install]() |
-| Elastic Search | [cheat-sheet](http://elasticsearch-cheatsheet.jolicode.com/) | [videos]()  | [examples]()  | [install]() |
-| GitHub | [cheat-sheet](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf) | [videos]()  | [examples]()  | [install]() |
-| Istio | [cheat-sheet](https://istio.io/docs/reference/commands/istioctl/) | [videos]()  | [examples]()  | [install]() |
-| Kubernetes | [cheat-sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/) | [videos]()  | [examples]()  | [install](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-binary-using-curl) |
-| OpenShift | [cheat-sheet](http://design.jboss.org/redhatdeveloper/marketing/openshift_cheatsheet/cheatsheet/images/openshift_cheat_sheet_r3v1.pdf) | [videos]()  | [examples]()  | [install]() |
 <!--
 |  | [cheat-sheet]() | [videos]()  | [examples]()  | [install]() | 
 |  | [cheat-sheet]() | [videos]()  | [examples]()  | [install]() | 
