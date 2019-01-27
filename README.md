@@ -1,7 +1,7 @@
 # My favorites
 - [Benjamin Franklin](https://en.wikipedia.org/wiki/Benjamin_Franklin): Tell me and I forget. Teach me and I remember. Involve me and I learn.
 - [Warren Bennis](https://en.wikipedia.org/wiki/Warren_Bennis) : Success in management requires learning as fast as the world is changing.
-- [Krishna](https://www.linkedin.com/in/krishnamanchikalapudi/): If i was like you, who will be like me!
+- [Krishna](https://www.linkedin.com/in/krishnamanchikalapudi/): If I am/was like you, who will be like me :-)
 
 
 # Learn to success!
