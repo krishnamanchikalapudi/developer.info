@@ -1,4 +1,4 @@
-# MyConfig
+# Software and Tools information
 
 ### MAC tools
 - [Google Chrome](https://www.google.com/chrome/)
