@@ -1,5 +1,12 @@
+# My favorites
+- [Benjamin Franklin](https://en.wikipedia.org/wiki/Benjamin_Franklin): Tell me and I forget. Teach me and I remember. Involve me and I learn.
+- [Warren Bennis](https://en.wikipedia.org/wiki/Warren_Bennis) : Success in management requires learning as fast as the world is changing.
+- [Krishna](https://www.linkedin.com/in/krishnamanchikalapudi/): If i was like you, who will be like me!
+
+
+# Learn to success!
 | Name | Cheat Sheets | Training videos | Playground  | Examples | PC Setup | 
-| --- | --- | --- | --- | --- | --- |
+| ------------- |:-------------:|:-------------:|:-------------:|:-------------:| -----:|
 | Docker | [cheat-sheet](https://www.docker.com/sites/default/files/Docker_CheatSheet_08.09.2016_0.pdf) | [videos](https://youtu.be/kwsJIH5TGIg)  | [start](https://www.katacoda.com/courses/docker) | [examples](https://github.com/docker/labs/tree/master/developer-tools)  | [install](https://docs.docker.com/docker-for-mac/install/) |
 | Elastic Search | [cheat-sheet](http://elasticsearch-cheatsheet.jolicode.com/) | [videos](https://www.elastic.co/videos) | [start](https://www.katacoda.com/courses/elasticsearch/playground) | [examples](https://github.com/elastic/examples)  | [install](https://www.elastic.co/guide/en/elasticsearch/reference/current/install-elasticsearch.html) |
 | GitHub | [cheat-sheet](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf) | [videos] | [start](https://www.katacoda.com/courses/git) | [examples]  | [install] |
@@ -20,7 +27,7 @@
 ## Container base images
 
 | Name | Docker | RHEL Openshift |
-| --- | --- | --- |
+| ------------- |:-------------:| -----:|
 | Apache HTTPD 2.x | [alpine](https://github.com/docker-library/httpd/blob/master/2.4/alpine/Dockerfile) | [rhel](https://access.redhat.com/containers/?tab=images&platform=docker#/registry.access.redhat.com/rhscl/httpd-24-rhel7)  | [examples]()  |
 | ElasticSearch | [alpine](https://github.com/docker-library/elasticsearch/blob/master/5/alpine/Dockerfile) | [roar]()  | [examples]()  | 
 | MongoDB | [hub]() | [roar]()  | [examples]()  |
@@ -38,3 +45,5 @@
 |  | [alpine]() | [roar]() | [examples]() | [aws]() |
 |  | [alpine]() | [roar]() | [examples]() | [aws]() |
 -->
+
+
