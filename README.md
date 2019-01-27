@@ -3,6 +3,7 @@
 - [Warren Bennis](https://en.wikipedia.org/wiki/Warren_Bennis) : Success in management requires learning as fast as the world is changing.
 - [Krishna](https://www.linkedin.com/in/krishnamanchikalapudi/): If I am/was like you, who will be like me :-)
 
+***
 
 # Learn to success!
 | Name | Cheat Sheets | Training videos | Playground  | Examples | PC Setup | 
@@ -23,6 +24,7 @@
 
 -->
 
+***
 
 ## Container base images
 
@@ -45,5 +47,11 @@
 |  | [alpine]() | [roar]() | [examples]() | [aws]() |
 |  | [alpine]() | [roar]() | [examples]() | [aws]() |
 -->
+
+***
+
+
+About [Krishna](https://www.linkedin.com/in/krishnamanchikalapudi/)
+
 
 
