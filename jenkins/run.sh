@@ -20,7 +20,7 @@ echo -e "  docker stop $containerId  "
 echo -e '\n ************************************************************* \n\n'
 
 sleep 2
-docker logs -f $containerId
+docker logs -f $containerId &
 
 sleep 10
 open -a 'Google Chrome' http://localhost:7080/login?j_password=${initialAdminPassword}
