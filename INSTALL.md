@@ -1,13 +1,12 @@
 # Software and Tools information
 
-### MAC tools
+### Tools
 - [Google Chrome](https://www.google.com/chrome/)
-- [Brew](https://brew.sh)
+- [Brew for MAC](https://brew.sh)
 - [Git Desktop](http://desktop.github.com)
 - [Shuttle](http://fitztrev.github.io/shuttle/)
 - [Postman](https://www.getpostman.com/downloads/)
 - [ArchiMate](https://www.archimatetool.com)
-
 
 
 ### Programming Languages
@@ -36,7 +35,7 @@
 ### HarshCorp Vault
 - [vaultproject.io](http://vaultproject.io)
 
-### Container
+### Container, Orchestration
 - [Docker](https://hub.docker.com/editions/community/docker-ce-desktop-mac)
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-with-homebrew-on-macos)
 - [Source 2 Image](https://github.com/openshift/source-to-image/releases/latest)
