@@ -6,6 +6,8 @@
 - [Git Desktop](http://desktop.github.com)
 - [Shuttle](http://fitztrev.github.io/shuttle/)
 - [Postman](https://www.getpostman.com/downloads/)
+- [ArchiMate](https://www.archimatetool.com)
+
 
 
 ### Programming Languages
