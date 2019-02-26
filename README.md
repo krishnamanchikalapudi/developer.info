@@ -1,20 +1,20 @@
 # My favorites
 - [Benjamin Franklin](https://en.wikipedia.org/wiki/Benjamin_Franklin): Tell me and I forget. Teach me and I remember. Involve me and I learn.
 - [Warren Bennis](https://en.wikipedia.org/wiki/Warren_Bennis) : Success in management requires learning as fast as the world is changing.
-- [Krishna](https://www.linkedin.com/in/krishnamanchikalapudi/): If I am/was like you, who will be like me :-)
+- [Krishna](https://www.linkedin.com/in/krishnamanchikalapudi/): If I am like you, who will be like me :-)
 
 ***
 
 ## Certification Courses
 
-| Name | linkedIn.com/Learning | acloud.guru
-| ------------- |:-------------:| -----:|
-| [Docker](https://success.docker.com/certification) | [lynda](https://www.lynda.com/learning-paths/Developer/prepare-for-the-docker-certified-associate-dca-certification) | ? |
-| [AWS Cloud Practitioner](https://aws.amazon.com/certification/certified-solutions-architect-associate/) | [lynda](https://www.lynda.com/learning-paths/IT/become-an-aws-cloud-practitioner) | [acloud](https://acloud.guru/learn/aws-certified-cloud-practitioner) |
-| [AWS Cloud Developer - Associate](https://aws.amazon.com/certification/certified-developer-associate/) | [lynda](https://www.lynda.com/learning-paths/Developer/become-a-cloud-developer) | [acloud](https://learn.acloud.guru/course/aws-certified-developer-associate-june-2018) |
-| [AWS DevOps Engineer – Professional](https://aws.amazon.com/certification/certified-devops-engineer-professional/) | [lynda](https://www.lynda.com/learning-paths/Web/prepare-for-aws-devops-engineer-professional-certification) | [acloud](https://acloud.guru/learn/aws-certified-devops-engineer-professional) |
-| [AWS Solution Architect - Associate](https://aws.amazon.com/certification/certified-solutions-architect-associate/) | [lynda](https://www.lynda.com/learning-paths/IT/prepare-for-aws-solutions-architect-associate-certification) | [acloud](https://acloud.guru/course/aws-certified-solutions-architect-associate/) |
-| [AWS Solution Architect - Professional](https://aws.amazon.com/certification/certified-solutions-architect-professional/) | ? | [acloud](https://learn.acloud.guru/course/aws-certified-solutions-architect-professional-2019/) |
+| Name | linkedIn.com/Learning | linuxacademy.com | acloud.guru
+| ------------- |:-------------:| -----:| -----:|
+| [Docker](https://success.docker.com/certification) | [lynda](https://www.lynda.com/learning-paths/Developer/prepare-for-the-docker-certified-associate-dca-certification) | ? | ? |
+| [AWS Cloud Practitioner](https://aws.amazon.com/certification/certified-solutions-architect-associate/) | [lynda](https://www.lynda.com/learning-paths/IT/become-an-aws-cloud-practitioner) | ? | [acloud](https://acloud.guru/learn/aws-certified-cloud-practitioner) |
+| [AWS Cloud Developer - Associate](https://aws.amazon.com/certification/certified-developer-associate/) | [lynda](https://www.lynda.com/learning-paths/Developer/become-a-cloud-developer) | ? | [acloud](https://learn.acloud.guru/course/aws-certified-developer-associate-june-2018) |
+| [AWS DevOps Engineer – Professional](https://aws.amazon.com/certification/certified-devops-engineer-professional/) | [lynda](https://www.lynda.com/learning-paths/Web/prepare-for-aws-devops-engineer-professional-certification) | ? | [acloud](https://acloud.guru/learn/aws-certified-devops-engineer-professional) |
+| [AWS Solution Architect - Associate](https://aws.amazon.com/certification/certified-solutions-architect-associate/) | [lynda](https://www.lynda.com/learning-paths/IT/prepare-for-aws-solutions-architect-associate-certification) | ? | [acloud](https://acloud.guru/course/aws-certified-solutions-architect-associate/) |
+| [AWS Solution Architect - Professional](https://aws.amazon.com/certification/certified-solutions-architect-professional/) | ? | ? | [acloud](https://learn.acloud.guru/course/aws-certified-solutions-architect-professional-2019/) |
 
 ***
 
