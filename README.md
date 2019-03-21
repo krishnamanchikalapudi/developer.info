@@ -15,6 +15,11 @@
 | [AWS DevOps Engineer – Professional](https://aws.amazon.com/certification/certified-devops-engineer-professional/) | [lynda](https://www.lynda.com/learning-paths/Web/prepare-for-aws-devops-engineer-professional-certification) | ? | [acloud](https://acloud.guru/learn/aws-certified-devops-engineer-professional) |
 | [AWS Solution Architect - Associate](https://aws.amazon.com/certification/certified-solutions-architect-associate/) | [lynda](https://www.lynda.com/learning-paths/IT/prepare-for-aws-solutions-architect-associate-certification) | [LA](https://linuxacademy.com/cp/coursescheduler/view/id/240764) | [acloud](https://acloud.guru/course/aws-certified-solutions-architect-associate/) |
 | [AWS Solution Architect - Professional](https://aws.amazon.com/certification/certified-solutions-architect-professional/) | ? | ? | [acloud](https://learn.acloud.guru/course/aws-certified-solutions-architect-professional-2019/) |
+| [Java - Spring Boot]() | [lynda](https://www.lynda.com/learning-paths/Web/become-a-spring-developer) | ? | ? |
+| [NodeJs]() | [lynda](https://www.lynda.com/learning-paths/Web/become-a-nodejs-developer) | ? | ? |
+
+
+
 
 ***
 
