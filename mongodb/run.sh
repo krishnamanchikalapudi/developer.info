@@ -1,37 +1,35 @@
 #!/bin/bash
 
-# Contanier details at https://hub.docker.com/r/jenkins/jenkins
+DATE=`date +%Y-%m-%d`
+DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 
-clear 
-export containerName=jenkins
+# https://learn.hashicorp.com/consul/getting-started/agent
+# Contanier details at https://hub.docker.com/_/mongo
+
+export containerName=mongo
 export hostAddress=127.0.0.1
-export hostPort=7080
-export WEB_ADDR="http://${hostAddress}:${hostPort}/login?j_password="
+export hostPort=27017
+export WEB_ADDR="http://${hostAddress}:${hostPort}"
 
 echo "\n -------- Downloading container: ${containerName} -------- \n "  
-docker pull ${containerName}/${containerName}:latest &
+docker pull ${containerName}:latest &
 
-echo "Starting jenkins container"  
-docker container run -d -p 7080:8080  -v ~/TOOLS/jenkins/jenkins_data:/var/jenkins_home jenkins/jenkins:latest
-sleep 10
 
-initialAdminPassword=`cat ~/TOOLS/jenkins/jenkins_data/secrets/initialAdminPassword`
+sleep 15
+echo "\n -------- Starting container: ${containerName}  -------- \n"
+docker run -p 27017:27017 -d --name mongodb -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=secret -v ~/TOOLS/mongodb/mongo_data:/data/db ${containerName} &
+
+sleep 15
+
 echo '\n\n -------- Container information -------- \n'
 containerId=$(docker container ls -a | grep ${containerName} | awk '{print $1}')
 IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${containerName}); 
 members=$(docker exec -t ${containerName} consul members)
-processId=`lsof -nP -iTCP:7080`
+processId=`lsof -nP -iTCP:27017`
 echo -e "Current DT: $DATE_TIME \n "
 echo -e "Container name: ${containerName} \n  "
 echo -e "Container id: ${containerId} \n  "
 echo -e "consul members: ${members} \n  "
-
-
-
-sleep 2
-docker logs -f $containerId &
-
-sleep 15
 
 
 sleep 5

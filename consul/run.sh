@@ -1,7 +1,7 @@
 
 # https://learn.hashicorp.com/consul/getting-started/agent
 
-export CONSUL_ADDR='http://127.0.0.1:8500'
+export WEB_ADDR='http://127.0.0.1:8500'
 
 echo '\n -------- Starting consul -------- \n'
 
@@ -15,4 +15,4 @@ consul members &
 
 
 sleep 5
-open -a 'Google Chrome' $CONSUL_ADDR
+open -a 'Google Chrome' $WEB_ADDR

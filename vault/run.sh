@@ -1,4 +1,4 @@
-# https://learn.hashicorp.com/vault/getting-started/first-secret
+# 
 
 #export VAULT_DEV_ROOT_TOKEN_ID=s.2BTYTVtKXj5cDsILkFk81ht4
 #export VAULT_DEV_UNSEAL_KEY=zUq7u9BaI4MAZrzLN1srbSu+axusSYvpnI9j59YmsJA=
@@ -10,7 +10,7 @@ vault server -dev &
 #./vault server -config vault.conf &
 
 sleep 10
-export VAULT_ADDR=http://127.0.0.1:8200
+export WEB_ADDR=http://127.0.0.1:8200
 echo '\n -------- vault status -------- \n'
 vault status & 
 
@@ -25,4 +25,6 @@ lsof -nP -iTCP:8200
 # vault kv get secret/springbootvault
 
 sleep 5
-open -a 'Google Chrome' $VAULT_ADDR
+open -a 'Google Chrome' $WEB_ADDR
+
+
