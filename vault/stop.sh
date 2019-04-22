@@ -1,7 +1,7 @@
 #!/bin/bash
 DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 
-containerName=jenkins
+containerName=vault
 containerId=`docker container ls -a | grep ${containerName} | awk '{print $1}'`
 
 echo -e '\n\n ************************************************************* \n'
