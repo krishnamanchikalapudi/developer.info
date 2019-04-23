@@ -8,24 +8,35 @@ export hostAddress=127.0.0.1
 export hostPort=7080
 export WEB_ADDR="http://${hostAddress}:${hostPort}/login?j_password="
 
-echo "\n -------- Downloading container: ${containerName} -------- \n "  
-docker pull ${containerName}/${containerName}:latest &
+DATE=`date +%Y-%m-%d`
+DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 
-echo "Starting jenkins container"  
+printf "\n%s\n" " -------- Downloading container: ${containerName} -------- "
+docker pull ${containerName}/${containerName}:latest 
+
+if [[ $1 == "debug" ]]
+then
+echo "DEBUG enabled"
+set -x  
+fi
+
+printf "\n%s\n" " -------- Starting container: ${containerName} -------- "
 docker container run -d -p 7080:8080  -v ~/TOOLS/jenkins/jenkins_data:/var/jenkins_home jenkins/jenkins:latest
 sleep 10
 
 initialAdminPassword=`cat ~/TOOLS/jenkins/jenkins_data/secrets/initialAdminPassword`
-echo '\n\n -------- Container information -------- \n'
+printf "\n\n%s\n" " -------- Container information -------- "
 containerId=$(docker container ls -a | grep ${containerName} | awk '{print $1}')
-IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${containerName}); 
-members=$(docker exec -t ${containerName} consul members)
-processId=`lsof -nP -iTCP:7080`
-echo -e "Current DT: $DATE_TIME \n "
-echo -e "Container name: ${containerName} \n  "
-echo -e "Container id: ${containerId} \n  "
-echo -e "consul members: ${members} \n  "
+#members=$(docker exec -t ${containerName} members)
+processId=$(lsof -nP -iTCP:${hostPort}); 
+#processId=`lsof -nP -iTCP:8500`
+printf "\n%s\n" " Current DT: $DATE_TIME"
+printf "\n%s\n" " Container name: ${containerName}"
+printf "\n%s\n" " Container id: ${containerId}"
+printf "\n%s\n" " Process id: ${processId}"
+printf "\n\n"
 
+set +x
 
 
 sleep 2
