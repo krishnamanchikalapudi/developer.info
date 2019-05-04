@@ -21,9 +21,6 @@
 | [Scrum Master](https://www.scrumalliance.org/get-certified/scrum-master-track/certified-scrummaster) | [lynda](https://www.lynda.com/Project-Management-tutorials/Cert-Prep-Certified-Scrum-Master/699334-2.html) | ? | ? |
 
 
-
-
-
 ***
 
 # Learn to success!
@@ -37,7 +34,7 @@
 | Kubernetes | [cheat-sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/) | [videos](https://www.youtube.com/playlist?list=PLBAFXs0YjviLrsyydCzxWrIP_1-wkcSHS) | [start](https://training.play-with-kubernetes.com/kubernetes-workshop) | [examples](https://github.com/kubernetes/examples)  | [install](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-binary-using-curl) |
 | OpenShift | [cheat-sheet](http://design.jboss.org/redhatdeveloper/marketing/openshift_cheatsheet/cheatsheet/images/openshift_cheat_sheet_r3v1.pdf) | [videos] | [start](https://learn.openshift.com/introduction/getting-started/) | [examples](https://github.com/RedHatWorkshops/openshiftv3-workshop)  | [install] |
 | ReactJs | [cheat-sheet] | [videos](https://www.lynda.com/learning-paths/Web/become-a-react-developer) | [start] | [examples] | [install](https://reactjs.org) | 
-
+|Master the Fundamentals of AI and Machine Learning | [cheat-sheet] | [videos](https://www.lynda.com/learning-paths/IT/master-the-fundamentals-of-ai-and-machine-learning) | [start] | [examples] | [N/A] | 
 
 
 <!--

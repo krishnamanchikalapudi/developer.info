@@ -19,6 +19,7 @@ sleep 3
 docker container ls -a | grep ${containerName} &
 
 #docker container ls -a &
+docker system prune -f &
 
 echo -e "**** Current DT: $DATE_TIME \n "
 exit 0
