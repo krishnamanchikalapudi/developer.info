@@ -18,9 +18,10 @@
 | [AWS Solution Architect - Professional](https://aws.amazon.com/certification/certified-solutions-architect-professional/) | ? | ? | [acloud](https://learn.acloud.guru/course/aws-certified-solutions-architect-professional-2019/) |
 | [Java - Spring Boot]() | [lynda](https://www.lynda.com/learning-paths/Web/become-a-spring-developer) | ? | ? |
 | [NodeJs]() | [lynda](https://www.lynda.com/learning-paths/Web/become-a-nodejs-developer) | ? | ? |
-| [Scrum Master](https://www.scrumalliance.org/get-certified/scrum-master-track/certified-scrummaster) | [lynda](https://www.lynda.com/Project-Management-tutorials/Cert-Prep-Certified-Scrum-Master/699334-2.html) | ? | ? |
-| [PMP](https://www.pmi.org/certifications/types/project-management-pmp) | [lynda](https://www.lynda.com/Project-Management-tutorials/Cert-Prep-Project-Management-Professional-PMP/659716-2.html) | ? | ? |
+| [Certified Scrum Master - CSM](https://www.scrumalliance.org/get-certified/scrum-master-track/certified-scrummaster) | [lynda](https://www.lynda.com/Project-Management-tutorials/Cert-Prep-Certified-Scrum-Master/699334-2.html) | ? | ? |
+| [Project Management Professional - PMP](https://www.pmi.org/certifications/types/project-management-pmp) | [lynda](https://www.lynda.com/Project-Management-tutorials/Cert-Prep-Project-Management-Professional-PMP/659716-2.html) | ? | ? |
 | [PMP Exam Tips](https://www.pmi.org/certifications/types/project-management-pmp) | [lynda](https://www.lynda.com/Project-Management-tutorials/Exam-Tips-Project-Management-Professional-PMP/679615-2.html) | ? | ? |
+
 
 
 ***
