@@ -16,10 +16,9 @@ docker pull ${containerName}:latest &
 
 sleep 15
 echo "\n -------- Starting container: ${containerName}  -------- \n"
-docker container run -d -p 5984:5984  -v ~/TOOLS/couchdb/couchdb_data:/opt/couchdb/data ${containerName}:latest
+docker container run -d -p ${hostPort}:${hostPort}  -v ~/TOOLS/couchdb/couchdb_data:/opt/couchdb/data ${containerName}:latest
 sleep 15
 
-echo '\n\n -------- Container information -------- \n'
 printf "\n\n%s\n" " -------- Container information -------- "
 containerId=$(docker container ls -a | grep ${containerName} | awk '{print $1}')
 #members=$(docker exec -t ${containerName} members)

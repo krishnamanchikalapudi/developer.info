@@ -21,7 +21,7 @@ set -x
 fi
 
 printf "\n%s\n" " -------- Starting container: ${containerName} -------- " 
-docker container run --cap-add=IPC_LOCK -d -p 8200:8200 vault:latest
+docker container run --cap-add=IPC_LOCK -d -p ${hostPort}:${hostPort} ${containerName}:latest
 sleep 10
 
 printf "\n\n%s\n" " -------- Container information -------- "

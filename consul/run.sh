@@ -20,7 +20,7 @@ set -x
 fi
 
 printf "\n%s\n" " -------- Starting container: ${containerName} -------- "
-docker container run -d -p 8500:8500 -e CONSUL_BIND_INTERFACE=eth0 consul:latest
+docker container run -d -p ${hostPort}:${hostPort} -e CONSUL_BIND_INTERFACE=eth0 ${containerName}:latest
 sleep 10
 
 printf "\n\n%s\n" " -------- Container information -------- "

@@ -12,7 +12,7 @@ DATE=`date +%Y-%m-%d`
 DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 
 printf "\n%s\n" " -------- Downloading container: ${containerName} -------- "
-docker pull ${containerName}/${containerName}:latest 
+docker pull ${containerName}:latest 
 
 if [[ $1 == "debug" ]]
 then
@@ -21,7 +21,7 @@ set -x
 fi
 
 printf "\n%s\n" " -------- Starting container: ${containerName} -------- "
-docker container run -d -p 7080:8080  -v ~/TOOLS/jenkins/jenkins_data:/var/jenkins_home jenkins/jenkins:latest
+docker container run -d -p ${hostPort}:8080  -v ~/TOOLS/jenkins/jenkins_data:/var/jenkins_home ${containerName}:latest
 sleep 10
 
 initialAdminPassword=`cat ~/TOOLS/jenkins/jenkins_data/secrets/initialAdminPassword`

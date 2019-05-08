@@ -20,7 +20,7 @@ set -x
 fi
 
 printf "\n%s\n" " -------- Starting container: ${containerName} -------- "
-docker container run -d -p 6379:6379  -v ~/TOOLS/redis/redis_data:/var/redis_home redis:latest
+docker container run -d -p ${hostPort}:${hostPort}  -v ~/TOOLS/redis/redis_data:/var/redis_home redis:latest
 sleep 15
 
 printf "\n\n%s\n" " -------- Container information -------- "
