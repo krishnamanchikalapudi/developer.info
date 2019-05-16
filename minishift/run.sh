@@ -17,6 +17,7 @@ printf "\n\n%s\n" " -------- Virtualization Environment: $DATE_TIME -------- "
 brew info --installed --json docker-machine-driver-xhyve
 
 echo '\n\n -------- minishift start -------- \n'
+./minishift config set insecure-registry 172.30.0.0/16,my-insecure-registry.io:8080
 ./minishift start --vm-driver virtualbox &
 sleep 120
 ./minishift oc-env export PATH="./cache/oc/v1.5.0:$PATH" &
