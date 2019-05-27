@@ -34,6 +34,9 @@ printf "\n\n"
 
 set +x
 
-sleep 5
+sleep 2
+docker logs -f $containerId &
+
+sleep 15
 #open -a 'Google Chrome' $WEB_ADDR
 exit 0

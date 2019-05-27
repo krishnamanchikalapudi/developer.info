@@ -35,7 +35,9 @@ printf "\n%s\n" " Container id: ${containerId}"
 printf "\n%s\n" " Process id: ${processId}"
 printf "\n\n"
 
+sleep 2
+docker logs -f $containerId &
 
-sleep 5
+sleep 15
 #open -a 'Google Chrome' $WEB_ADDR
 exit 0
