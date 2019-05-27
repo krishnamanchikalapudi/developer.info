@@ -9,7 +9,9 @@ echo -e "Command to stop container: ${containerName} \n "
 echo -e "docker container stop $containerId "
 echo -e '\n ************************************************************* \n\n'
 
-docker container stop $containerId  &
+if [ ! -z "$containerId" ]; then
+    docker container stop $containerId  &
+fi
 
 sleep 5
 echo "\n -------- Cleaning unused containers -------- \n "  
