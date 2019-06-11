@@ -17,7 +17,7 @@ docker pull ${containerName}:latest &
 
 sleep 15
 printf "\n -------- Starting container: ${containerName}  -------- \n"
-docker run -p ${hostPort}:${hostPort} -d --name mongodb -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=secret -v ~/TOOLS/mongodb/mongo_data:/data/db ${containerName} &
+docker run -p ${hostPort}:${hostPort} -d --name ${containerName} -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=secret -v ~/TOOLS/mongodb/mongo_data:/data/db ${containerName} &
 
 sleep 15
 

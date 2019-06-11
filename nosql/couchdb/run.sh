@@ -16,7 +16,7 @@ docker pull ${containerName}:latest &
 
 sleep 15
 echo "\n -------- Starting container: ${containerName}  -------- \n"
-docker container run -d -p ${hostPort}:${hostPort}  -v ~/TOOLS/couchdb/couchdb_data:/opt/couchdb/data ${containerName}:latest
+docker container run -d --name ${containerName} -p ${hostPort}:${hostPort}  -v ~/TOOLS/couchdb/couchdb_data:/opt/couchdb/data ${containerName}:latest
 sleep 15
 
 printf "\n\n%s\n" " -------- Container information -------- "
