@@ -1,0 +1,56 @@
+{
+    "mappings": [
+        {
+            "request": {
+                "method": "GET",
+                "url": "/user/v1/",
+                "headers": {
+                    "Content-Type": {
+                        "equalTo": "application/json",
+                        "caseInsensitive": true
+                    }
+                }
+            },
+            "response": {
+                "status": 200,
+                "bodyFileName": "user/v1/get.json",
+                "headers": {
+                    "Content-Type": "application/json"
+                }
+            }
+        },
+        {
+            "request": {
+                "method": "POST",
+                "url": "/user/v1/",
+                "headers": {
+                    "Content-Type": {
+                        "equalTo": "application/json",
+                        "caseInsensitive": true
+                    }
+                }
+            },
+            "response": {
+                "status": 201,
+                "bodyFileName": "user/v1/post.json",
+                "headers": {
+                    "Content-Type": "application/json"
+                }
+            }
+        },
+        {
+            "request": {
+                "method": "GET",
+                "url": "/user/v1/health"
+            },
+            "response": {
+                "status": 200,
+                "bodyFileName": "user/v1/health.json",
+                "headers": {
+                    "Content-Type": "application/json"
+                }
+            }
+        }
+    ]
+
+}

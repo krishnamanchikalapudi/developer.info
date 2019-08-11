@@ -1,0 +1,23 @@
+{
+    "status": "UP",
+    "details": {
+        "buildInfo": {
+            "status": "UP",
+            "details": {
+                "name": "user",
+                "time": "2019-08-11T02:54:39.987Z",
+                "version": "0.0.1-SNAPSHOT",
+                "encoding.reporting": "UTF-8",
+                "uptime": "29 seconds"
+            }
+        },
+        "diskSpace": {
+            "status": "UP",
+            "details": {
+                "total": 499963174912,
+                "free": 394922557440,
+                "threshold": 10485760
+            }
+        }
+    }
+}
