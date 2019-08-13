@@ -5,7 +5,7 @@ DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 
 # Contanier details at https://hub.docker.com/_/mysql
 
-export containerName=mysql
+export containerName=mariadb
 export hostAddress=127.0.0.1
 export hostPort=3306
 export WEB_ADDR="http://${hostAddress}:${hostPort}"
@@ -19,8 +19,8 @@ docker pull ${containerName}:latest &
 
 sleep 15
 printf "\n -------- Starting container: ${containerName}  -------- \n"
-# docker run --name ${containerName} -e MYSQL_ROOT_PASSWORD=${ROOT_PASSWORD} -v  $(pwd)/conf.d/myconf.cnf:/etc/mysql/conf.d/myconf.cnf  -v  $(pwd)/script:/var/lib/mysql  -d ${containerName} &
-docker run --name ${containerName} -p ${hostPort}:${hostPort} -e MYSQL_ROOT_PASSWORD=${ROOT_PASSWORD} -d ${containerName} &
+docker run -d --name ${containerName} -e MYSQL_ROOT_PASSWORD=${ROOT_PASSWORD} -v ~/TOOLS/mysql/mysql_data:/var/lib/mysql ${containerName} &
+
 sleep 15
 
 printf '\n\n -------- Container information -------- \n'
@@ -39,17 +39,5 @@ sleep 2
 docker logs -f $containerId &
 
 sleep 15
-
-: '
-docker exec -it ${containerName} mysql_config_editor set --login-path=local --host=localhost 
-docker exec -i ${containerName} mysql password=$(grep -oP 'temporary password(.*): \K(\S+)' /var/log/mysqld.log)
-mysqladmin --user=root --password="$password" password aaBB@@cc1122
-
-
-docker exec -i ${containerName} mysql  -u $ROOT_USERNAME -p $ROOT_PASSWORD
-docker exec -i ${containerName} mysql --login-path=local -e 'show databases;'
-docker exec -i ${containerName} mysql --login-path=local < $(pwd)/script/data.sql
-'
-
 #open -a 'Google Chrome' $WEB_ADDR
 exit 0

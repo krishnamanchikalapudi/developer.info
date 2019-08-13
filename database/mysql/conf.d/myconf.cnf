@@ -1,0 +1,25 @@
+[client]
+port=3306
+socket=/tmp/mysql.sock
+# The following password will be sent to all standard MySQL clients
+password="my-secret-pw"
+
+[mysql]
+no-auto-rehash
+connect_timeout=2
+
+[mysqld-8.0]
+sql_mode=TRADITIONAL
+
+[mysqladmin]
+force
+
+[mysqld]
+key_buffer_size=16M
+port=3306
+socket=/tmp/mysql.sock
+key_buffer_size=16M
+max_allowed_packet=128M
+
+[mysqldump]
+quick
