@@ -6,6 +6,7 @@
 ***
 
 ## Information
+- [Cheat Sheets](CHEAT-SHEETS.md)
 - [Certification courses](CERTIFICATION-COURSES.md)
 - [Training courses](TRAINING-COURSES.md)
 - [Container Base Images](CONTAINER-IMAGES.md)
