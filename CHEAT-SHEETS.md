@@ -12,3 +12,12 @@
 | Istio | [https://istio.io/docs/reference/commands/istioctl/](https://istio.io/docs/reference/commands/istioctl/) |
 | Kubernetes | [https://kubernetes.io/docs/reference/kubectl/cheatsheet/](https://kubernetes.io/docs/reference/kubectl/cheatsheet/) |
 | OpenShift | [http://design.jboss.org/redhatdeveloper/marketing/openshift_cheatsheet/cheatsheet/images/openshift_cheat_sheet_r3v1.pdf](http://design.jboss.org/redhatdeveloper/marketing/openshift_cheatsheet/cheatsheet/images/openshift_cheat_sheet_r3v1.pdf) | 
+
+
+
+- [Home](README.md)
+***
+
+
+
+About [Krishna](https://www.linkedin.com/in/krishnamanchikalapudi/)
