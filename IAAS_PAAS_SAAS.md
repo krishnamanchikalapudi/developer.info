@@ -12,7 +12,7 @@ Examples
 | ------------- | AWS EC2 |   |  |
 | ------------- | Google Compute | Google App Engine | G Suite |
 | ------------- |  |   | Gmail, Dropbox, Salesforce |
-| Pizza made at Home | (Pizza buy, take & bake)[https://www.cpk.com/Event/TakeAndBake] |  Pizza Delivered to home | Pizza dinned at restaurant |
+| Pizza made at Home | [Pizza buy, take & bake](https://www.cpk.com/Event/TakeAndBake[) |  Pizza Delivered to home | Pizza dinned at restaurant |
 
 
 ***
