@@ -1,10 +1,9 @@
 [Home](../README.md)
 ***
 
-- [x] MySQL
-- [x] Postgres
-- [x] Cockroach
-- [x] MariaDb
+- [ ] Amazon
+- [ ] Azure
+- [ ] [Google](gcp)
 
 
 ***

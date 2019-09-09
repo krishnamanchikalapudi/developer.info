@@ -17,12 +17,19 @@
 | SSH Cheat Sheet | [https://opensource.com/downloads/advanced-ssh-cheat-sheet](https://opensource.com/downloads/advanced-ssh-cheat-sheet)  |
 | Vim Cheat Sheet | [https://opensource.com/downloads/cheat-sheet-vim](https://opensource.com/downloads/cheat-sheet-vim)  |
 | DevSecOps | [https://opensource.com/downloads/devsecops](https://opensource.com/downloads/devsecops)  |
+| SFDC UI: Visual force Developer | [https://resources.docs.salesforce.com/rel1/doc/en-us/static/pdf/SF_Visualforce_Developer_cheatsheet_web.pdf]( https://resources.docs.salesforce.com/rel1/doc/en-us/static/pdf/SF_Visualforce_Developer_cheatsheet_web.pdf)  |
+| SFDC Apex Code | [http://resources.docs.salesforce.com/rel1/doc/en-us/static/pdf/SF_Apex_Code_cheatsheet_web.pdf](http://resources.docs.salesforce.com/rel1/doc/en-us/static/pdf/SF_Apex_Code_cheatsheet_web.pdf )  |
+| SFDC UI: Lightning Components | [http://resources.docs.salesforce.com/rel1/doc/en-us/static/pdf/SF_LightningComponents_cheatsheet_web.pdf](http://resources.docs.salesforce.com/rel1/doc/en-us/static/pdf/SF_LightningComponents_cheatsheet_web.pdf)  |
+| SFDC Cheat Sheets | [https://developer.salesforce.com/page/Cheat_Sheets](https://developer.salesforce.com/page/Cheat_Sheets)  |
+
+
+
 
 - [Home](README.md)
 ***
 
 <!--
-|  | [ ]( )  |
+
 |  | [ ]( )  |
 |  | [ ]( )  |
 -->
