@@ -1,12 +1,11 @@
 #!/bin/bash
 
-. ./config.sh
-rm -rf ${CONFLUENT_HOME}/confluent.*/kafka/logs/*
+
 
 DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
-printf "\n\n%s\n" " -------- Starting KAFKA:  ${DATE_TIME} -------- "
+printf "\n\n%s\n" " -------- Starting Apache Pulsar:  ${DATE_TIME} -------- "
 
-bin/confluent local start
+bin/pulsar standalone
 
 sleep 10
 # open -na "Google Chrome" --args 'https://docs.confluent.io/current/quickstart/ce-quickstart.html'
