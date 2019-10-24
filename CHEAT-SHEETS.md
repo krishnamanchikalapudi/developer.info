@@ -22,6 +22,7 @@
 | SFDC Apex Code | [http://resources.docs.salesforce.com/rel1/doc/en-us/static/pdf/SF_Apex_Code_cheatsheet_web.pdf](http://resources.docs.salesforce.com/rel1/doc/en-us/static/pdf/SF_Apex_Code_cheatsheet_web.pdf )  |
 | SFDC UI: Lightning Components | [http://resources.docs.salesforce.com/rel1/doc/en-us/static/pdf/SF_LightningComponents_cheatsheet_web.pdf](http://resources.docs.salesforce.com/rel1/doc/en-us/static/pdf/SF_LightningComponents_cheatsheet_web.pdf)  |
 | SFDC Cheat Sheets | [https://developer.salesforce.com/page/Cheat_Sheets](https://developer.salesforce.com/page/Cheat_Sheets)  |
+| Salesforce CLI Command | [https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_force.htm](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_force.htm)  |
 | Linux Permissions | [https://opensource.com/sites/default/files/gated-content/cheat_sheet_linux_permissions.pdf](https://opensource.com/sites/default/files/gated-content/cheat_sheet_linux_permissions.pdf)  |
 
 
