@@ -20,9 +20,15 @@
 | [Salesforce Admin](http://certification.salesforce.com/administrator/) | [lynda](https://www.lynda.com/Salesforce-tutorials/Learning-Salesforce-Admin/758615-2.html) | ? | ? |
 | [Salesforce Developers](https://trailhead.salesforce.com/credentials/developeroverview) | [lynda]() | ? | ? |
 | [Salesforce Architects](https://trailhead.salesforce.com/credentials/architectoverview) | [lynda]() | ? | ? |
+| [Certified Cloud Security Professional - CCSP](https://) | [lynda](https://www.linkedin.com/learning/ccsp-cert-prep-1-cloud-concepts-architecture-and-design) | [LA](https://linuxacademy.com/cp/modules/view/id/390) | [cybrary](https://www.cybrary.it/course/ccsp/) |
+
+<!--
+
+| [ ](https://) | [lynda](https://) |  | [AG]((https://)) |
+| [ ](https://) | [lynda](https://) | [LA](https://) | [AG]((https://)) |
 
 
-
+-->
 
 
 - [Home](README.md)
