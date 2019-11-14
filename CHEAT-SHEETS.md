@@ -14,6 +14,7 @@
 | Istio | [https://istio.io/docs/reference/commands/istioctl/](https://istio.io/docs/reference/commands/istioctl/) |
 | Jenkins | [https://jenkins.io/user-handbook.pdf](https://jenkins.io/user-handbook.pdf) |
 | Kubernetes | [https://kubernetes.io/docs/reference/kubectl/cheatsheet/](https://kubernetes.io/docs/reference/kubectl/cheatsheet/) |
+| Microservices | [https://opensource.com/sites/default/files/gated-content/cheat_sheet_microservices_final.pdf](https://opensource.com/sites/default/files/gated-content/cheat_sheet_microservices_final.pdf)  |
 | OpenShift | [http://design.jboss.org/redhatdeveloper/marketing/openshift_cheatsheet/cheatsheet/images/openshift_cheat_sheet_r3v1.pdf](http://design.jboss.org/redhatdeveloper/marketing/openshift_cheatsheet/cheatsheet/images/openshift_cheat_sheet_r3v1.pdf) | 
 | SSH Cheat Sheet | [https://opensource.com/downloads/advanced-ssh-cheat-sheet](https://opensource.com/downloads/advanced-ssh-cheat-sheet)  |
 | Vim Cheat Sheet | [https://opensource.com/downloads/cheat-sheet-vim](https://opensource.com/downloads/cheat-sheet-vim)  |
