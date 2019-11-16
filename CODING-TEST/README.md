@@ -3,8 +3,8 @@
 <b>Problem</b> :thinking: Given a string, find the length of the longest substring without repeating characters.<br/>
 :tipping_hand_man: Input: "abcabecbb",  Output: 4 , Explanation: The answer is "abce", with the length of 4.<br/>
 :tipping_hand_man: Input: "aabcdeeab",  Output: 5 , Explanation: The answer is "abcde", with the length of 5.<br/>
-:open_book: [Java source code](https://github.com/krishnamanchikalapudi/examples.java/blob/develop/CodeTest/src/code/test/RepeatingCharacters.java)<br/>
-``````
+:open_book: [Java source code](https://github.com/krishnamanchikalapudi/examples.java/blob/develop/CodeTest/src/code/test/RepeatingCharacters.java)<br/> 
+```
 Input: abcabecbb
 [a]
 [a, b]
@@ -83,16 +83,14 @@ Input: abcabcabc
 [b, c]
 [c]
 Output: 3
-`````
+```
 <br/><br/>
-
-
 
 
 <b>Problem</b> :thinking: Given a string, prints number of occurrences of each characters.<br/>
 :tipping_hand_man: Input: "aa",  Output: 2 <br/>
 :open_book: [Java source code](https://github.com/krishnamanchikalapudi/examples.java/blob/develop/CodeTest/src/code/test/RepeatingCharactersCount.java)<br/>
-``````
+```
 Input: aa
 Number of occurrence: char 'a' is 2
 
@@ -102,14 +100,13 @@ Number of occurrence: char 'b' is 4
 Number of occurrence: char 'c' is 2
 Number of occurrence: char 'e' is 1
 
-
 Input: aabcdeeab
 Number of occurrence: char 'a' is 3
 Number of occurrence: char 'b' is 2
 Number of occurrence: char 'c' is 1
 Number of occurrence: char 'd' is 1
 Number of occurrence: char 'e' is 2
-`````
+```
 <br/><br/>
 
 
@@ -118,18 +115,18 @@ Number of occurrence: char 'e' is 2
 <b>Problem</b> :thinking: <br/>
 :tipping_hand_man: <br/>
 :open_book: [Java source code]()<br/>
-``````
+```
 
-`````
+```
 <br/><br/>
 
 
 <b>Problem</b> :thinking: <br/>
 :tipping_hand_man: <br/>
 :open_book: [Java source code]()<br/>
-``````
+```
 
-`````
+```
 <br/><br/>
 
 -->
