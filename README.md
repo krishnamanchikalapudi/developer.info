@@ -10,6 +10,8 @@
 - [Certification courses](CERTIFICATION-COURSES.md)
 - [Training courses](TRAINING-COURSES.md)
 - [Container Base Images](CONTAINER-IMAGES.md)
+- [Github markdown](https://guides.github.com/features/mastering-markdown/)
+- [Github emoji-cheat-sheet](https://github.com/ikatyang/emoji-cheat-sheet/blob/master/README.md)
 
 
 
