@@ -19,10 +19,17 @@ jobs:
       - name: init
         run: |
           dockerVersion=`docker -v`
-          printf "\t\n%s" " ${dockerVersion}"
+          printf "\t\n%s\n" " ${dockerVersion}"
+          dockerInfo=`docker info`
+          printf "\t\n%s\n" " ${dockerInfo}"
       - name: clean
         run: |
           docker system prune -f
+      - name: Docker login
+        run: docker login registry.redhat.io --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
+        env:
+          DOCKER_USERNAME: ${{ secrets.REDHAT_USER }}
+          DOCKER_PASSWORD: ${{ secrets.REDHAT_PASSWORD }}
       - name: build
         run: |
           docker pull registry.redhat.io/rhscl/nodejs-12-rhel7
