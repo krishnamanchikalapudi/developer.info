@@ -1,0 +1,28 @@
+name: Docker Test
+on: [push]
+jobs:
+  docker:
+    name: Docker
+    strategy:
+      matrix:
+        docker-version:
+          - 19.x
+        docker-channel:
+          - stable
+    runs-on: ubuntu-latest
+    steps:
+      - name: setup Docker version ${{ matrix.docker-version }}
+        uses: actions/setup-node@v1
+        with:
+          docker_version: ${{ matrix.docker-version }}
+          docker_channel: ${{ matrix.docker-channel }}
+      - name: init
+        run: |
+          dockerVersion=`docker -v`
+          printf "\t\n%s" " ${dockerVersion}"
+      - name: clean
+        run: |
+          docker system prune -f
+      - name: build
+        run: |
+          docker pull registry.redhat.io/rhscl/nodejs-12-rhel7
