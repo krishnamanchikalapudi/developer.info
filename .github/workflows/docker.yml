@@ -26,7 +26,7 @@ jobs:
         run: |
           docker system prune -f
       - name: Docker RHEL login
-        run: echo '${DOCKER_PASSWORD}' | docker login registry.redhat.io --username ${DOCKER_USERNAME} --password-stdin 
+        run: echo $DOCKER_PASSWORD | docker login registry.redhat.io --username $DOCKER_USERNAME --password-stdin
         env:
           DOCKER_USERNAME: ${{ secrets.REDHAT_USER }}
           DOCKER_PASSWORD: ${{ secrets.REDHAT_PASSWORD }}
