@@ -1,7 +1,8 @@
 #!/bin/bash
-
+printf "\n\n\n\n\n"
 DATE=`date +%Y-%m-%d`
 DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
+CURRENT_PATH=`pwd`
 
 # Contanier details at https://hub.docker.com/_/mysql
 
@@ -20,36 +21,32 @@ docker pull ${containerName}:latest &
 sleep 15
 printf "\n -------- Starting container: ${containerName}  -------- \n"
 # docker run --name ${containerName} -e MYSQL_ROOT_PASSWORD=${ROOT_PASSWORD} -v  $(pwd)/conf.d/myconf.cnf:/etc/mysql/conf.d/myconf.cnf  -v  $(pwd)/script:/var/lib/mysql  -d ${containerName} &
-docker run --name ${containerName} -p ${hostPort}:${hostPort} -e MYSQL_ROOT_PASSWORD=${ROOT_PASSWORD} -d ${containerName} &
+
+# docker run --name ${containerName} -p ${hostPort}:${hostPort} -e MYSQL_ROOT_PASSWORD=${ROOT_PASSWORD} -d ${containerName} &
+
+# docker run --name ${containerName} -v ${CURRENT_PATH}/scripts:/docker-entrypoint-initdb.d -p ${hostPort} -e MYSQL_ROOT_PASSWORD=${ROOT_PASSWORD} -e MYSQL_DATABASE=${containerName} -d ${containerName} &
+
+docker run --name ${containerName} -v ${CURRENT_PATH}/scripts:/docker-entrypoint-initdb.d -p ${hostPort}:${hostPort} -e MYSQL_ROOT_PASSWORD=${ROOT_PASSWORD} -e MYSQL_DATABASE=${containerName} -d ${containerName} --verbose --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci &
+
+
 sleep 15
 
-printf '\n\n -------- Container information -------- \n'
-printf "\n\n%s\n" " -------- Container information -------- "
+printf "\n\n%s\n" " -------- [BEGIN] Container information -------- "
 containerId=$(docker container ls -a | grep ${containerName} | awk '{print $1}')
-#members=$(docker exec -t ${containerName} members)
 processId=$(lsof -nP -iTCP:${hostPort}); 
-#processId=`lsof -nP -iTCP:5984`
 printf "\n%s\n" " Current DT: $DATE_TIME"
 printf "\n%s\n" " Container name: ${containerName}"
 printf "\n%s\n" " Container id: ${containerId}"
 printf "\n%s\n" " Process id: ${processId}"
 printf "\n\n"
+printf "\n\n%s\n" " -------- [END] Container information -------- "
 
-sleep 2
+sleep 5
+
 docker logs -f $containerId &
 
 sleep 15
 
-: '
-docker exec -it ${containerName} mysql_config_editor set --login-path=local --host=localhost 
-docker exec -i ${containerName} mysql password=$(grep -oP 'temporary password(.*): \K(\S+)' /var/log/mysqld.log)
-mysqladmin --user=root --password="$password" password aaBB@@cc1122
-
-
-docker exec -i ${containerName} mysql  -u $ROOT_USERNAME -p $ROOT_PASSWORD
-docker exec -i ${containerName} mysql --login-path=local -e 'show databases;'
-docker exec -i ${containerName} mysql --login-path=local < $(pwd)/script/data.sql
-'
 
 #open -a 'Google Chrome' $WEB_ADDR
 exit 0

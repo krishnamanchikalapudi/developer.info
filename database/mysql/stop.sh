@@ -1,4 +1,5 @@
 #!/bin/bash
+printf "\n\n\n\n\n"
 DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 
 containerName=mysql
