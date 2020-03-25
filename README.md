@@ -5,6 +5,7 @@
 # My favorites
 - [Benjamin Franklin](https://en.wikipedia.org/wiki/Benjamin_Franklin): Tell me and I forget. Teach me and I remember. Involve me and I learn.
 - [Warren Bennis](https://en.wikipedia.org/wiki/Warren_Bennis) : Success in management requires learning as fast as the world is changing.
+- [Bill Nye](https://en.wikipedia.org/wiki/Bill_Nye): Everyone you Will Ever Meet Knows Something that You Don’t.
 - [Krishna](https://www.linkedin.com/in/krishnamanchikalapudi/): If I am like you, who will be like me :-)
 
 ***
