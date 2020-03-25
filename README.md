@@ -1,5 +1,14 @@
-[![GitHub stars](https://img.shields.io/github/stars/krishnamanchikalapudi/developer.info.svg)](https://github.com/krishnamanchikalapudi/examples.java/stargazers)
-
+### Code
+![GitHub language count](https://img.shields.io/github/languages/count/krishnamanchikalapudi/developer.info)
+![GitHub last commit](https://img.shields.io/github/last-commit/krishnamanchikalapudi/developer.info)
+![GitHub repo size](https://img.shields.io/github/repo-size/krishnamanchikalapudi/developer.info)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/krishnamanchikalapudi/developer.info)
+### Github
+[![GitHub stars](https://img.shields.io/github/stars/krishnamanchikalapudi/developer.info.svg)](https://github.com/krishnamanchikalapudi/developer.info/stargazers)
+![GitHub followers](https://img.shields.io/github/followers/krishnamanchikalapudi?style=social)
+![GitHub forks](https://img.shields.io/github/forks/krishnamanchikalapudi/developer.info?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/krishnamanchikalapudi/developer.info?style=social)
+![GitHub license](https://img.shields.io/github/license/krishnamanchikalapudi/developer.info)
 
 
 # My favorites
