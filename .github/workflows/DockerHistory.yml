@@ -32,4 +32,4 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.REDHAT_PASSWORD }}
       - name: build
         run: |
-          docker image history registry.redhat.io/rhscl/nodejs-12-rhel7
+          docker image history -H registry.redhat.io/rhscl/nodejs-12-rhel7
