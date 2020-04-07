@@ -1,0 +1,35 @@
+name: Docker History
+on: [push]
+jobs:
+  docker:
+    name: DockerHistory
+    strategy:
+      matrix:
+        docker-version:
+          - 19.x
+        docker-channel:
+          - stable
+    runs-on: ubuntu-latest
+    steps:
+      - name: setup Docker version ${{ matrix.docker-version }}
+        uses: actions/setup-node@v1
+        with:
+          docker_version: ${{ matrix.docker-version }}
+          docker_channel: ${{ matrix.docker-channel }}
+      - name: init
+        run: |
+          dockerVersion=`docker -v`
+          printf "\t\n%s\n" " ${dockerVersion}"
+          dockerInfo=`docker info`
+          printf "\t\n%s\n" " ${dockerInfo}"
+      - name: clean
+        run: |
+          docker system prune -f
+      - name: Docker RHEL login
+        run: echo $DOCKER_PASSWORD | docker login registry.redhat.io --username $DOCKER_USERNAME --password-stdin
+        env:
+          DOCKER_USERNAME: ${{ secrets.REDHAT_USER }}
+          DOCKER_PASSWORD: ${{ secrets.REDHAT_PASSWORD }}
+      - name: build
+        run: |
+          docker image history registry.redhat.io/rhscl/nodejs-12-rhel7
