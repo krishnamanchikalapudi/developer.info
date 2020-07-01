@@ -15,7 +15,7 @@
 | Jenkins | [https://jenkins.io/user-handbook.pdf](https://jenkins.io/user-handbook.pdf) |
 | Kubernetes | [https://kubernetes.io/docs/reference/kubectl/cheatsheet/](https://kubernetes.io/docs/reference/kubectl/cheatsheet/) |
 | Microservices | [https://opensource.com/sites/default/files/gated-content/cheat_sheet_microservices_final.pdf](https://opensource.com/sites/default/files/gated-content/cheat_sheet_microservices_final.pdf)  |
-| OpenShift | [https://developers.redhat.com/download-manager/file/openshift_cheat_sheet_r5v1.pdf](http://design.jboss.org/redhatdeveloper/marketing/openshift_cheatsheet/cheatsheet/images/openshift_cheat_sheet_r3v1.pdf) | 
+| OpenShift | [http://design.jboss.org/redhatdeveloper/marketing/openshift_cheatsheet/cheatsheet/images/openshift_cheat_sheet_r3v1.pdf](http://design.jboss.org/redhatdeveloper/marketing/openshift_cheatsheet/cheatsheet/images/openshift_cheat_sheet_r3v1.pdf) | 
 | SSH Cheat Sheet | [https://opensource.com/downloads/advanced-ssh-cheat-sheet](https://opensource.com/downloads/advanced-ssh-cheat-sheet)  |
 | Vim Cheat Sheet | [https://opensource.com/downloads/cheat-sheet-vim](https://opensource.com/downloads/cheat-sheet-vim)  |
 | DevSecOps | [https://opensource.com/downloads/devsecops](https://opensource.com/downloads/devsecops)  |
@@ -24,9 +24,7 @@
 | SFDC UI: Lightning Components | [http://resources.docs.salesforce.com/rel1/doc/en-us/static/pdf/SF_LightningComponents_cheatsheet_web.pdf](http://resources.docs.salesforce.com/rel1/doc/en-us/static/pdf/SF_LightningComponents_cheatsheet_web.pdf)  |
 | SFDC Cheat Sheets | [https://developer.salesforce.com/page/Cheat_Sheets](https://developer.salesforce.com/page/Cheat_Sheets)  |
 | Salesforce CLI Command | [https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_force.htm](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_force.htm)  |
-| Salesforce Developer Limits and Allocations Quick Reference | [https://developer.salesforce.com/docs/atlas.en-us.226.0.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_overview.htm](https://developer.salesforce.com/docs/atlas.en-us.226.0.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_overview.htm)  |
 | Linux Permissions | [https://opensource.com/sites/default/files/gated-content/cheat_sheet_linux_permissions.pdf](https://opensource.com/sites/default/files/gated-content/cheat_sheet_linux_permissions.pdf)  |
-| Curl commands | [https://opensource.com/sites/default/files/gated-content/curl-cheat-sheet.pdf](https://opensource.com/sites/default/files/gated-content/curl-cheat-sheet.pdf)  |
 
 
 

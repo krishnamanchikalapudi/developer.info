@@ -5,7 +5,6 @@
 # Learn to success!
 | Name | Training videos | Playground  | Examples | PC Setup |  eBook | 
 | ------------- |:-------------:|:-------------:|:-------------:| -----:| -----:|
-|Istio Service Mesh RedHat Workshop | [videos] | [start](https://developers.redhat.com/courses/service-mesh/) | [examples] | [N/A] |   eBook | 
 | Docker | [videos](https://youtu.be/kwsJIH5TGIg)  | [start](https://training.play-with-docker.com/ops-s1-hello/) | [examples](https://github.com/docker/labs/tree/master/developer-tools)  | [install](https://docs.docker.com/docker-for-mac/install/) |  eBook | 
 | Elastic Search | [videos](https://www.elastic.co/videos) | [start](https://www.katacoda.com/courses/elasticsearch/playground) | [examples](https://github.com/elastic/examples)  | [install](https://www.elastic.co/guide/en/elasticsearch/reference/current/install-elasticsearch.html) |  eBook | 
 | GitHub |  [videos] | [start](https://www.katacoda.com/courses/git) | [examples]  | [install] |  eBook | 
@@ -17,8 +16,6 @@
 |Fundamentals of AI and Machine Learning | [cheat-sheet] | [videos](https://www.lynda.com/learning-paths/IT/master-the-fundamentals-of-ai-and-machine-learning) | [start] | [examples] | [N/A] |   eBook | 
 |Machine Learning Specialist | [start] | [examples] | [N/A] |   eBook | 
 |Advance AI and Machine Learning | [videos](https://www.lynda.com/learning-paths/IT/advance-your-skills-in-ai-and-machine-learning) | [start] | [examples] | [N/A] |   eBook | 
-
-
 
 
 
