@@ -1,3 +1,6 @@
+## Pre-requsitie
+* Review [ckad-ns.yaml](./ckad-ns.yaml)
+
 ## Namespaces
 * [kubectl create ns ckad-ns](create.sh)
 * [kubectl apply -f ckad-ns.yaml](apply.sh)
@@ -14,6 +17,8 @@ Error from server (AlreadyExists): error when creating "ckad-ns.yaml": namespace
 
 
 ## Dashboard Screenshots
+### Before APP deploy or After APP delete
 ![Before](./images/deploy-before.png)
 
-![After](./deployment/images/deploy-after.png)
+### After APP create or apply
+![After](./images/deploy-after.png)

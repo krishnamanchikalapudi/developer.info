@@ -10,4 +10,4 @@
 
 
 ## Follow below sequence
-* [Namespaces](/namespaces)
+* [Namespaces](./namespaces)
