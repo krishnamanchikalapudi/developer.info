@@ -11,3 +11,5 @@
 
 ## Follow below sequence
 * [Namespaces](./namespaces)
+* [Nodes](./nodes)
+* [Pods](./pods)

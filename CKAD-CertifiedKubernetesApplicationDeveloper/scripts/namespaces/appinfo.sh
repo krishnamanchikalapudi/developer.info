@@ -1,3 +1,3 @@
 #!/bin/bash
 
-APP_YAML="ckad-ns.yaml"
+APP_YAML="app-namespace.yaml"
