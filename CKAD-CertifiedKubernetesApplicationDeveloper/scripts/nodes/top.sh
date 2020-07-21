@@ -7,11 +7,11 @@
 printf "\n%s\n\n" "----------- [START] DEPLOY: ${START_DATE_TIME}"
 printf "\n%s\t" "App Name: ${APP_YAML}"
 
-kubectl delete -f ${APP_YAML}
+kubectl top nodes
 
 sleep 2
 
 
 # open dashboard
 . ../config-end.sh
-printf "\n%s\n\n" "----------- [END] DEPLOY: ${DATE_TIME} "
+printf "\n%s\n\n" "----------- [END] DEPLOY: ${END_DATE_TIME}"

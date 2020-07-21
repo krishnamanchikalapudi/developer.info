@@ -1,15 +1,19 @@
 #
 
 ## Pre-requsitie
-* [Minikube](https://github.com/kubernetes/minikube/releases)
+* [Brew](www.brew.sh)
+  * [Linux](http://docs.brew.sh/Homebrew-on-Linux)
+  * [Mac](www.brew.sh)
+  * [Windows 10 Subsystem for Linux](http://docs.brew.sh/Homebrew-on-Linux)
+* [Minikube](http://github.com/kubernetes/minikube/releases)
 
 
 ## Minikube
-* [MiniKube is local K8s](https://minikube.sigs.k8s.io/docs/start/)
-* [Handbook](https://minikube.sigs.k8s.io/docs/handbook/)
+* [MiniKube is local K8s](http://minikube.sigs.k8s.io/docs/start/)
+* [Handbook](http://minikube.sigs.k8s.io/docs/handbook/)
 
 
 ## Follow below sequence
-* [Namespaces](./namespaces)
 * [Nodes](./nodes)
+* [Namespaces](./namespaces)
 * [Pods](./pods)

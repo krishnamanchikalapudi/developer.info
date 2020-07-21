@@ -1,4 +1,4 @@
-Namespaces provide a way to keep objects organized within the cluster. Every object belongs to a namespace. When no namespace is specified teh cluster will assume the 'default' namespace.
+Kubernetes supports multiple virtual clusters backed by the same physical cluster. These virtual clusters are called namespaces.
 
 Kubernetes starts with four initial namespaces:
 * **default** The default namespace for objects with no other namespace
@@ -6,6 +6,7 @@ Kubernetes starts with four initial namespaces:
 * **kube-public** This namespace is created automatically and is readable by all users (including those not authenticated). This namespace is mostly reserved for cluster usage, in case that some resources should be visible and readable publicly throughout the whole cluster. The public aspect of this namespace is only a convention, not a requirement.
 * **kube-node-lease** This namespace for the lease objects associated with each node which improves the performance of the node heartbeats as the cluster scales
 
+Reference: [K8S.io namespaces](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
 
 ## Pre-requsitie
 * Review [app-namespace.yaml](./app-namespace.yaml)

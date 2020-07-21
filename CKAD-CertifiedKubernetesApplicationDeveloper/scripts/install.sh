@@ -7,5 +7,4 @@ sysctl -a | grep machdep.cpu.features | grep VMX
 brew update && brew install kubectl && brew cask install docker virtualbox && brew install minikube
 
 
-# Start Application
-minikube start & 
+. ./start.sh
