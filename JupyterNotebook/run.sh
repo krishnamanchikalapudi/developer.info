@@ -2,7 +2,7 @@
 
 . ./config.sh
 
-pip3 install --upgrade jupyter jupyterlab nodebook pythonic pillow
+pip3 install --upgrade jupyter pythonic pillow
 
 jupyter notebook &
 
