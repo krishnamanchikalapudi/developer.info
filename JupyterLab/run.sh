@@ -2,7 +2,7 @@
 
 . ./config.sh
 
-pip3 install --upgrade jupyterlab notebook pythonic pillow
+pip3 install --upgrade jupyterlab notebook pythonic pillow jupyterlab-git jupyterlab_github jupyterlab-debugger jupyterlab_hdf dataregistry-extension
 
 # serverextension enable --py jupyterlab --sys-prefix
 
