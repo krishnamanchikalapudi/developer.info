@@ -24,7 +24,7 @@
 		<plugin.jar.version>3.1.1</plugin.jar.version>
 		<plugin.project-info.version>3.0.0</plugin.project-info.version>
 		<plugin.jib.version>1.0.1</plugin.jib.version>
-		<junit.version>4.12</junit.version>
+		<junit.version>4.13.1</junit.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
