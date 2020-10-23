@@ -2,9 +2,9 @@
 
 . ./config.sh
 
-pip3 install --upgrade jupyterlab notebook pythonic pillow
+pip3 install --upgrade jupyter jupyterlab notebook pythonic pillow jupyterlab-git jupyterlab-github jupyterlab-widgets jupyterlab-hdf jupyterlab-autoversion  jupyterlab-scheduler
 
-# serverextension enable --py jupyterlab --sys-prefix
+# jupyter lab build
 
 jupyter lab --notebook-dir=${WORKSPACE} &
 
