@@ -13,6 +13,6 @@
 | Data Engineering for DS | [https://github.com/maxhumber/DE4DS](https://github.com/maxhumber/DE4DS) |
 | Advance ML project | [https://github.com/nsadawi/Advanced-ML-Projects](https://github.com/nsadawi/Advanced-ML-Projects) |
 | Tensorflow Examples | [https://github.com/jtoy/awesome-tensorflow](https://github.com/jtoy/awesome-tensorflow) |
-|  | []() |
+| [Stanford ML course](https://www.coursera.org/learn/machine-learning) | [https://github.com/krasserm/machine-learning-notebooks](https://github.com/krasserm/machine-learning-notebooks) |
 |  | []() |
 
