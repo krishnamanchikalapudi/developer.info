@@ -68,6 +68,7 @@ dashboard(){
 }
 start(){
     minikube start & 
+    source <(kubectl completion bash)
     # minikube start & --vm-driver=docker-machine-driver-vmwareworkstation --cpus=2 --memory=8192 --disk-size=20000
     sleep 60
     setup

@@ -1,0 +1,6 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: ckad-1
+  labels:
+    app: ckad-1-namespace

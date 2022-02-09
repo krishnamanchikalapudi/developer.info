@@ -40,6 +40,7 @@ CKAD: Certified Kubernetes Application Developer information
 alias k='minikube kubectl --'
 export do="--dry-run=client -o yaml"
 # do usage: k run busybox --image=busybox --restart=Never $do > busybox.yaml
+source <(kubectl completion bash)
 ``````
 - [Helm install](https://helm.sh/docs/helm/helm_install/)
 - My Software version:
@@ -67,6 +68,7 @@ export do="--dry-run=client -o yaml"
 - [Katacoda K8S](https://www.katacoda.com/courses/kubernetes)
 - [Katacoda Kubernetes Fundamentals](https://www.katacoda.com/javajon/courses/)
 - [Katacoda CKAD](https://katacoda.com/ckad-prep/)
+- [Katacoda practice challenge](https://www.katacoda.com/liptanbiswas/courses/ckad-practice-challenges)
 - kubernetes-fundamentals)
 - Oreilly practice scenarios
     - [x] [2-1. CKAD Pods: Creating and Interacting with a Pod](https://learning.oreilly.com/scenarios/2-1-ckad-pods/9781098104818/)

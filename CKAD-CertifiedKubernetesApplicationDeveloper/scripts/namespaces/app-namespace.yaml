@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: Namespace  # https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
-metadata:   #
-  name: ckad-ns
-  labels:     # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-    env: dev
-    app: tutoring
-    type: ns

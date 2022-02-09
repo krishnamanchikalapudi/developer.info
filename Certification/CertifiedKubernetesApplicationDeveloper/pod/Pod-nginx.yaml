@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-1-nginx
+  namespace: ckad-ns
+  labels:
+    env: dev
+    type: frontend
+spec:
+  containers:
+  - image: nginx
+    name: pod-1-nginx
+    ports:
+    - containerPort: 80
+      protocol: TCP
+  restartPolicy: Never
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-2-nginx
+  namespace: ckad-ns
+  labels:
+    env: qa
+    type: frontend
+spec:
+  containers:
+  - image: nginx
+    name: pod-2-nginx
+    ports:
+    - containerPort: 80
+      protocol: TCP
+  restartPolicy: Never
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: pod-3-nginx
+  name: pod-3-nginx
+  namespace: ckad-ns
+spec:
+  containers:
+  - image: nginx
+    name: pod-3-nginx
+    ports:
+    - containerPort: 80
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pod-3-nginx
+  namespace: ckad-ns
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: pod-3-nginx
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-4
+  namespace: ckad-ns
+  labels:
+    env: dev
+spec:
+  containers:
+  - image: nginx
+    name: pod-4-nginx
+    ports:
+    - containerPort: 80
+      protocol: TCP
+  - args:
+    - /bin/sh
+    - -c
+    - 'for i in 1 2 3 4 5; do echo "busybox $i times"; done '
+    image: busybox
+    name: pod-4-busybox
+  restartPolicy: Never
+---
