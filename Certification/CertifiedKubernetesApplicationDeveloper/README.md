@@ -9,7 +9,7 @@ CKAD: Certified Kubernetes Application Developer information
     - Application Deployment - 20%
         - Use Kubernetes primitives to implement common deployment strategies (e.g. blue/green or canary)
         - Understand Deployments and how to perform rolling updates
-        - Use the [Helm](https://www.katacoda.com/courses/helm) package manager to deploy existing packages
+        - Use the [Helm](https://www.katacoda.com/courses/helm) [package manager to deploy existing packages](https://www.katacoda.com/courses/kubernetes/helm-package-manager)
     - Application [observability](https://www.katacoda.com/javajon/courses/kubernetes-observability) and maintenance - 15%
         - Understand API deprecations
         - Implement probes and health checks
@@ -37,9 +37,13 @@ CKAD: Certified Kubernetes Application Developer information
 - [Kubectl install](https://kubernetes.io/docs/tasks/tools/)
     * Mac, configure alias in '.zprofile'
 ``````sh
-alias k='minikube kubectl --'
+alias kubectl='minikube kubectl --'
+alias k=kubectl
+
 export do="--dry-run=client -o yaml"
 # do usage: k run busybox --image=busybox --restart=Never $do > busybox.yaml
+export now="--grace-period 0 --force"
+# do usage: k delete pods/busybox $now
 source <(kubectl completion bash)
 ``````
 - [Helm install](https://helm.sh/docs/helm/helm_install/)
