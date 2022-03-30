@@ -130,6 +130,8 @@ source <(kubectl completion bash)
     - [X] [State Persistence - 8%](https://github.com/dgkanatsios/CKAD-exercises/blob/master/g.state.md)
     - [X] [CKAD Scenarios](https://learning.oreilly.com/playlists/ea6ea0fc-d8e2-422c-94dd-a0a8f608d224/)
 - [CKAD Simulator](https://killer.sh/ckad) 
+- [Play with K8S](https://labs.play-with-k8s.com/)
+- [Play with Docker](https://labs.play-with-docker.com/) 
 
 
 
