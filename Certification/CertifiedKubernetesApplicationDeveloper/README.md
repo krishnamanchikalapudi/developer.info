@@ -132,6 +132,10 @@ source <(kubectl completion bash)
 - [CKAD Simulator](https://killer.sh/ckad) 
 - [Play with K8S](https://labs.play-with-k8s.com/)
 - [Play with Docker](https://labs.play-with-docker.com/) 
+- Hashicorp Vault integration
+    - [Integrating Hashicorp Vault in OpenShift 4](https://cloud.redhat.com/blog/integrating-hashicorp-vault-in-openshift-4)
+    - [Injecting Secrets into Kubernetes Pods via Vault Agent Containers](https://learn.hashicorp.com/tutorials/vault/kubernetes-sidecar)
+    - [Integrate a Kubernetes Cluster with an External Vault](https://learn.hashicorp.com/tutorials/vault/kubernetes-external-vault?in=vault/kubernetes)
 
 
 
