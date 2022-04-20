@@ -9,7 +9,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<reports.outputDirectory>${basedir}/target/reports</reports.outputDirectory>
-		<spring.version>2.1.3.RELEASE</spring.version>
+		<spring.version>2.5.12</spring.version>
 		<jackson.dataformat.version>2.9.8</jackson.dataformat.version>
 		<swagger2.version>2.9.2</swagger2.version>
 
