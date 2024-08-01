@@ -1,0 +1,234 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: replicas-pv
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /tmp/postgres-data/replicas
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: replicas-pvc
+  namespace: postgresql
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-replicas
+  namespace: postgresql
+  labels:
+    app: postgres
+data:
+  pg_hba.conf: |
+    # TYPE  DATABASE        USER            ADDRESS                 METHOD
+    local   all             all                                     trust
+    host    all             all             127.0.0.1/32            trust
+    host    all             all             10.0.0.1/32             trust
+    host    all             all             ::1/128                 trust
+    host    all             all             172.0.0.0/8             trust
+    host    all             all             192.0.0.0/32             trust
+    host    all             all             0.0.0.0/0               trust
+    host    all             all             ::1/0                   trust
+
+    local   replication     all                                     trust
+    host    replication     all             0.0.0.0/0               trust
+    host    replication     all             ::1/0                   trust
+  postgresql.conf: |
+    listen_addresses = '*'
+    port = 5432
+    max_connections = 50
+    ssl = off
+    shared_buffers = 32MB
+    archive_mode = off
+
+    # Replication Settings - Master
+    wal_level = replica # used to enable PostgreSQL streaming replication
+    wal_log_hints = on  # helpful if the standby server is out of sync with the master server
+    max_wal_senders = 10
+    wal_keep_size = 1GB
+    wal_compression = on
+    hot_standby = on
+    archive_command = 'rsync -a %p /opt/pg_archives/%f' 
+  extra.sh: |
+    #!/bin/sh
+    postgres -D /var/lib/postgresql
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sts-replicas
+  namespace: postgresql
+spec:
+  serviceName: svc-replicas
+  replicas: 2
+  selector:
+    matchLabels:
+      app: postgresql
+      role: replicas
+  template:
+    metadata:
+      labels:
+        app: postgresql
+        role: replicas
+        version: 14.x
+    spec:
+      volumes:
+        - name: postgres-replicas-data
+          persistentVolumeClaim:
+            claimName: replicas-pvc
+        - name: postgres-replicas-config
+          configMap:
+            name: cm-replicas
+      containers:
+      - name: postgresql
+        image: postgres:14
+        ports:
+        - containerPort: 5432
+          protocol: TCP
+        livenessProbe:
+          exec:
+            command:
+              - bash
+              - -ec
+              - 'PGPASSWORD=$POSTGRES_PASSWORD psql -w -U $POSTGRES_USER -d $POSTGRES_DB -h 127.0.0.1 -c "SELECT 1"'
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 6
+        readinessProbe:
+          exec:
+            command:
+              - bash
+              - -ec
+              - 'PGPASSWORD=$POSTGRES_PASSWORD psql -w -U $POSTGRES_USER -d $POSTGRES_DB -h 127.0.0.1 -c "SELECT 1"'
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 6
+        envFrom:
+          - configMapRef:
+              name: cm-replicas
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: ps-secrets
+              key: PS_DB
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: ps-secrets
+              key: PS_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ps-secrets
+              key: PS_PASSWORD
+        - name: PGPOOL_ADMIN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: ps-secrets
+              key: PS_USER
+        - name: PGPOOL_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ps-secrets
+              key: PS_PASSWORD
+        - name: POSTGRES_REPLICATION_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ps-secrets
+              key: PS_PASSWORD
+        - name: REPMGR_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: ps-secrets
+              key: PS_USER
+        - name: REPMGR_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ps-secrets
+              key: PS_PASSWORD
+        - name: REPMGR_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: ps-secrets
+              key: PS_DB
+        - name: PGPOOL_ENABLE_LOAD_BALANCING
+          value: "yes"
+        - name: PGPOOL_ENABLE_LOG_CONNECTIONS
+          value: "true"
+        - name: PGPOOL_ENABLE_LOG_HOSTNAME
+          value: "true"
+        - name: PGPOOL_ENABLE_LOG_PER_NODE_STATEMENT
+          value: "true"
+        - name: PGPOOL_CHILD_LIFE_TIME
+          value: ""
+        - name: PGPOOL_ENABLE_TLS
+          value: "no"
+#        - name: REPMGR_replicas_HOST
+#          value: "sts-replicas-0.svc-replicas.$(REPMGR_NAMESPACE).svc.cluster.local"
+#        - name: REPMGR_PARTNER_NODES
+#          value: "sts-replicas-0.svc-replicas.$(REPMGR_NAMESPACE).svc.cluster.local,sts-replicas-1.svc-replicas.$(REPMGR_NAMESPACE).svc.cluster.local" # replicas = 2
+#        - name: REPMGR_NODE_NAME
+#          value: "$(MY_POD_NAME)"
+#        - name: REPMGR_NODE_NETWORK_NAME
+#          value: "$(MY_POD_NAME).svc-replicas.$(REPMGR_NAMESPACE).svc.cluster.local"
+        - name: REPMGR_LOG_LEVEL
+          value: "NOTICE"
+        - name: REPMGR_CONNECT_TIMEOUT
+          value: "5"
+        - name: REPMGR_RECONNECT_ATTEMPTS
+          value: "3"
+        - name: REPMGR_RECONNECT_INTERVAL
+          value: "5"
+        volumeMounts:
+        - name: postgres-replicas-data
+          mountPath: /var/lib/postgresql/data
+        - name: postgres-replicas-config
+          mountPath: /var/lib/postgresql/postgresql.conf
+          subPath: postgresql.conf
+        - name: postgres-replicas-config
+          mountPath: /var/lib/postgresql/pg_hba.conf
+          subPath: pg_hba.conf
+        args:
+          - "-c"
+          - "config_file=/var/lib/postgresql/postgresql.conf"
+          - "-c"
+          - "hba_file=/var/lib/postgresql/pg_hba.conf"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-replicas
+  namespace: postgresql
+spec:
+#   type: ClusterIP
+  type: NodePort
+  selector:
+    app: postgresql
+    role: replicas
+  ports:
+    - name: replicas-port
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
+      nodePort: 30081 # 30000-32767
+---
