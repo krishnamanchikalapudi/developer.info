@@ -21,6 +21,8 @@ helm repo add jfrog https://charts.jfrog.io && helm repo update
 ```````
 ./artifactory.sh info
 ```````
+ - NOTE: It is necessary to obtain a license key to execute JFrog Artifactory subsequent to the initial login.
+
 ## UnInstall
 ```````
 ./artifactory.sh delete
