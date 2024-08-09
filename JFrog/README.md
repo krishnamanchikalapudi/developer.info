@@ -2,9 +2,9 @@
 
 ## prerequisite 
 [x] [kubernetes](https://k8s.io/) 
-    - [minikube](https://minikube.sigs.k8s.io/docs/start)
-    - [podman desktop](https://podman-desktop.io)
-    - [rancher desktop](https://rancherdesktop.io)
+ - [minikube](https://minikube.sigs.k8s.io/docs/start)
+ - [podman desktop](https://podman-desktop.io)
+ - [rancher desktop](https://rancherdesktop.io)
 [x] [helm](helm.sh)
 [x] Add helm info
 ```````
