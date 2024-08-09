@@ -1,0 +1,13 @@
+tensorflow
+tensorflow-datasets
+tensorboard
+Pillow
+PyYAML
+numpy
+urllib3
+pandas
+matplotlib
+scipy
+pylint
+tensorflow-macos
+tensorflow-metal
