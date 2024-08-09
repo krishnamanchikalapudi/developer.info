@@ -1,6 +1,5 @@
 # Install JFrog Artifactory on Kubernetes
 
-
 ## prerequisite 
 [x] [kubernetes](https://k8s.io/) 
     - [minikube](https://minikube.sigs.k8s.io/docs/start)
@@ -11,6 +10,7 @@
 ```````
 helm repo add jfrog https://charts.jfrog.io && helm repo update
 ```````
+
 ## Install
 ```````
 ./k8s.sh install
