@@ -11,6 +11,10 @@ TFdeveloperCertificate/data/*
 CertifiedKubernetesApplicationDeveloper/*.pdf
 /TFdeveloperCertificate/data/*
 
+*-lock.json
+*.lock
+*.license
+**/**/*.license
 # C extensions
 *.so
 .DS_Store

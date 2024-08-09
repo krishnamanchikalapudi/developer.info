@@ -2,10 +2,10 @@
 arg=${1}
 DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 
-NAMESPACE="artifactory"
-artifactoy-install() {
+NAMESPACE="xray"
+xray-install() {
     printf "\n ----------------------------------------------------------------  "
-    printf "\n ------------ INSTALLING... JFrog Artifactory on K8S ------------  "
+    printf "\n ------------ INSTALLING... JFrog Xray on K8S ------------  "
     printf "\n ----------------------------------------------------------------  \n"
     export MASTER_KEY=$(openssl rand -hex 32) && echo "MASTER KEY: ${MASTER_KEY} \n"
 
@@ -16,37 +16,36 @@ artifactoy-install() {
     kubectl create secret generic my-masterkey-secret -n ${NAMESPACE} --from-literal=master-key=${MASTER_KEY}
     kubectl create secret generic my-joinkey-secret -n ${NAMESPACE} --from-literal=join-key=${JOIN_KEY}
 
-    # Install the chart with the release name  artifactory and with master key and join key.
-    helm upgrade --install artifactory --set artifactory.replicaCount=2 --set artifactory.masterKey=${MASTER_KEY} --set artifactory.joinKey=${JOIN_KEY} --namespace ${NAMESPACE} jfrog/artifactory
+    export NODE_PORT_HTTP=$(kubectl get svc -n artifactory artifactory-artifactory-nginx -o jsonpath='{.spec.ports[0].nodePort}') 
+
+    # Install the chart with the release name xray and with master key and join key.
+    helm upgrade --install xray --set xray.replicaCount=2 --set xray.masterKeySecretName=${MASTER_KEY} --set xray.joinKeySecretName=${JOIN_KEY} --set xray.jfrogUrl='http://localhost:${NODE_PORT_HTTP}' --namespace ${NAMESPACE} jfrog/xray
 
     sleep 30
 
     export LOCAL_IP=$(ipconfig getifaddr en0)
-    kubectl patch svc artifactory-artifactory-nginx -n ${NAMESPACE} -p '{"spec": {"type": "NodePort"}}'
+    #kubectl patch svc artifactory-artifactory-nginx -n ${NAMESPACE} -p '{"spec": {"type": "NodePort"}}'
     sleep 5
     # Change default password ref: https://jfrog.com/help/r/jfrog-rest-apis/change-password
 }
-artifactoy-serviceInfo(){
+xray-serviceInfo(){
     printf "\n ----------------------------------------------------------------  "
-    printf "\n ----------------  JFrog Artifactory: K8S Info  ----------------  "
+    printf "\n ----------------  JFrog Xray: K8S Info  ----------------  "
     printf "\n ----------------------------------------------------------------  \n"
 
-    kubectl get pv && printf "\n" && kubectl get pvc,endpoints,pods,svc,rs,statefulset,deploy -n ${NAMESPACE} && printf "\n"
-
+    kubectl get pv && printf "\n" && kubectl get pvc,endpoints,pods,svc,rs,deploy -n ${NAMESPACE} && printf "\n"
+    
     export NODE_PORT_HTTP=$(kubectl get svc -n ${NAMESPACE} artifactory-artifactory-nginx -o jsonpath='{.spec.ports[0].nodePort}') 
     export NODE_PORT_HTTPS=$(kubectl get svc -n ${NAMESPACE} artifactory-artifactory-nginx -o jsonpath='{.spec.ports[1].nodePort}') 
     printf "\n\nHTTP Port: ${NODE_PORT_HTTP}      Browser URI: http://localhost:${NODE_PORT_HTTP}\n"
     printf "HTTPS Port: ${NODE_PORT_HTTPS}     Browser URI: https://localhost:${NODE_PORT_HTTPS}\n"
     printf "Default username: admin    password: pawsword \n\n"
-
-    printf "PostgreSql database cmd: kubectl exec -it service/artifactory-postgresql -n ${NAMESPACE} -- psql -d artifactory -U artifactory \n"
-
 }
-artifactoy-delete(){
+xray-delete(){
     printf "\n ----------------------------------------------------------------  "
-    printf "\n ------------ CLEANING the JFrog Artifactory on K8S ------------  "
+    printf "\n ------------ CLEANING the JFrog Xray on K8S ------------  "
     printf "\n ----------------------------------------------------------------  \n"
-    helm uninstall ${NAMESPACE} && sleep 90 && kubectl delete pvc -l app=artifactory
+    helm uninstall ${NAMESPACE} && sleep 90 && kubectl delete pvc -l app=xray
     kubectl delete ns ${NAMESPACE} --force=true --ignore-not-found=true
     printf "\n CLEANING: COMPLETE at $(date +"%Y-%m-%d %H:%M:%S") \n"
 }
@@ -64,13 +63,13 @@ if [[ -n $arg ]] ; then
     echo "User Action: ${arg}, and arg length: ${arg_len}"
     
     if [[ "INSTALL" == "${arg}" ]] ; then   # Download & install 
-        artifactoy-install
+        xray-install
         sleep 5
-        artifactoy-serviceInfo
+        # xray-serviceInfo
     elif [[ "DELETE" == "${arg}" ]] ; then   # delete 
-        artifactoy-delete
+        xray-delete
     elif [[ "INFO" == "${arg}" ]] ; then   # Info 
-        artifactoy-serviceInfo
+        xray-serviceInfo
     fi
 fi
 

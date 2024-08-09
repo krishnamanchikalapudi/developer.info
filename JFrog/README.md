@@ -1,6 +1,8 @@
-# Install JFrog Artifactory on Kubernetes
+# Install JFrog products on Kubernetes
 
-## prerequisite 
+
+## Artifactory
+### prerequisite 
 [x] [kubernetes](https://k8s.io/) 
  - [minikube](https://minikube.sigs.k8s.io/docs/start)
  - [podman desktop](https://podman-desktop.io)
@@ -13,18 +15,19 @@
 helm repo add jfrog https://charts.jfrog.io && helm repo update
 ```````
 
-## Install
+### Install
 ```````
 ./artifactory.sh install
 ```````
-### Get port information
+#### Get port information
 ```````
 ./artifactory.sh info
 ```````
  - NOTE: It is necessary to obtain a license key to execute JFrog Artifactory subsequent to the initial login.
 
-## UnInstall
+### UnInstall
 ```````
 ./artifactory.sh delete
 ```````
 
+## Xray
