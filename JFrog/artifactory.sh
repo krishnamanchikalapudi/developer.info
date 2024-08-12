@@ -18,6 +18,7 @@ artifactoy-install() {
 
     # Install the chart with the release name  artifactory and with master key and join key.
     helm upgrade --install artifactory --set artifactory.replicaCount=1 --set artifactory.masterKey=${MASTER_KEY} --set artifactory.joinKey=${JOIN_KEY} --namespace ${NAMESPACE} jfrog/artifactory
+    # kubectl scale svc/artifactory -n artifactory --current-replicas=2 --replicas=1 
 
     sleep 30
 
@@ -42,9 +43,12 @@ artifactoy-serviceInfo(){
     export DB_NODE_PORT=$(kubectl get svc artifactory-postgresql -n ${NAMESPACE}  -o jsonpath='{.spec.ports[0].nodePort}') 
     # jdbc:oracle:thin:[<user>/<password>]@<host>[:<port>]:<SID>    jdbc:postgresql://host:port/database
     printf "\n\nDatabase Port: ${NODE_PORT_HTTP}   JDBC DB URI: jdbc:postgresql://localhost:${DB_NODE_PORT}/artifactory  \n"
-    export DB_UPASSWORD=$(kubectl get secrets artifactory-postgresql -n ${NAMESPACE}   -o jsonpath='{.data.postgresql-password}' | base64 --decode)
+    export DB_UPASSWORD=$(kubectl get secrets artifactory-postgresql -n ${NAMESPACE} -o jsonpath='{.data.postgresql-password}' | base64 --decode)
+    printf "kubectl exec -it pods/artifactory-postgresql-0 -n artifactory -- psql -d ${NAMESPACE} -U artifactory \n"
     printf "DB Defaults; DB: artifactory   username: artifactory    password: ${DB_UPASSWORD} \n\n"
-
+    printf "DB Defaults; DB: artifactory   username: artifactory    password: ${DB_UPASSWORD} \n\n"
+    
+    
     export NODE_PORT_HTTP=$(kubectl get svc -n ${NAMESPACE} artifactory-artifactory-nginx -o jsonpath='{.spec.ports[0].nodePort}') 
     export NODE_PORT_HTTPS=$(kubectl get svc -n ${NAMESPACE} artifactory-artifactory-nginx -o jsonpath='{.spec.ports[1].nodePort}') 
     printf "\n\nHTTP Port: ${NODE_PORT_HTTP}      Browser URI: http://localhost:${NODE_PORT_HTTP}\n"

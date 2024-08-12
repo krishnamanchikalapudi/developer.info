@@ -31,3 +31,8 @@ helm repo add jfrog https://charts.jfrog.io && helm repo update
 ```````
 
 ## Xray 
+
+
+
+## References
+- [kubectl commands](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands)
