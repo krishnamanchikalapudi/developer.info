@@ -30,4 +30,4 @@ helm repo add jfrog https://charts.jfrog.io && helm repo update
 ./artifactory.sh delete
 ```````
 
-## Xray
+## Xray 
