@@ -3,6 +3,7 @@ arg=${1}
 DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 
 NAMESPACE="xray"
+alias k=kubectl
 xray-install() {
     printf "\n ----------------------------------------------------------------  "
     printf "\n ------------ INSTALLING... JFrog Xray on K8S ------------  "
@@ -19,21 +20,37 @@ xray-install() {
     export NODE_PORT_HTTP=$(kubectl get svc -n artifactory artifactory-artifactory-nginx -o jsonpath='{.spec.ports[0].nodePort}') 
 
     # Install the chart with the release name xray and with master key and join key.
-    helm upgrade --install xray --set xray.replicaCount=2 --set xray.masterKeySecretName=${MASTER_KEY} --set xray.joinKeySecretName=${JOIN_KEY} --set xray.jfrogUrl='http://localhost:${NODE_PORT_HTTP}' --namespace ${NAMESPACE} jfrog/xray
+    helm upgrade --install xray --set xray.replicaCount=1 --set xray.masterKeySecretName=${MASTER_KEY} --set xray.joinKeySecretName=${JOIN_KEY} --set xray.jfrogUrl='http://localhost:${NODE_PORT_HTTP}' --namespace ${NAMESPACE} jfrog/xray
 
     sleep 30
 
-    export LOCAL_IP=$(ipconfig getifaddr en0)
     #kubectl patch svc artifactory-artifactory-nginx -n ${NAMESPACE} -p '{"spec": {"type": "NodePort"}}'
     sleep 5
     # Change default password ref: https://jfrog.com/help/r/jfrog-rest-apis/change-password
+
+    # expose postgres as NodePort
+    kubectl patch svc xray-postgresql -n ${NAMESPACE} -p '{"spec": {"type": "NodePort"}}'
+    sleep 5
+    # expose rabbitmq as NodePort
+    kubectl patch svc xray-rabbitmq -n ${NAMESPACE} -p '{"spec": {"type": "NodePort"}}'
+    sleep 5
 }
 xray-serviceInfo(){
     printf "\n ----------------------------------------------------------------  "
     printf "\n ----------------  JFrog Xray: K8S Info  ----------------  "
     printf "\n ----------------------------------------------------------------  \n"
 
-    kubectl get pv && printf "\n" && kubectl get pvc,endpoints,pods,svc,rs,deploy -n ${NAMESPACE} && printf "\n"
+    kubectl get pv && printf "\n" && kubectl get pvc,endpoints,pods,svc,rs,statefulset,deploy -n ${NAMESPACE} && printf "\n"
+
+    export RMQ_NODE_PORT=$(kubectl get svc xray-rabbitmq -n ${NAMESPACE}  -o jsonpath='{.spec.ports[0].nodePort}')
+    printf "\n\Rabbit MQ Port: ${NODE_PORT_HTTP}  \n"
+
+    export DB_NODE_PORT=$(kubectl get svc xray-postgresql -n ${NAMESPACE}  -o jsonpath='{.spec.ports[0].nodePort}') 
+    # jdbc:oracle:thin:[<user>/<password>]@<host>[:<port>]:<SID>    jdbc:postgresql://host:port/database
+    printf "\n\nDatabase Port: ${NODE_PORT_HTTP}   JDBC DB URI: jdbc:postgresql://localhost:${DB_NODE_PORT}/xray  \n"
+    export DB_UPASSWORD=$(kubectl get secrets xray-postgresql -n ${NAMESPACE} -o jsonpath='{.data.postgresql-password}' | base64 --decode)
+    printf "kubectl exec -it pods/xray-postgresql-0 -n ${NAMESPACE} -- psql -d ${NAMESPACE} -U xray \n"
+    printf "DB Defaults; DB: xray   username: xray    password: ${DB_UPASSWORD} \n\n"
     
     export NODE_PORT_HTTP=$(kubectl get svc -n ${NAMESPACE} artifactory-artifactory-nginx -o jsonpath='{.spec.ports[0].nodePort}') 
     export NODE_PORT_HTTPS=$(kubectl get svc -n ${NAMESPACE} artifactory-artifactory-nginx -o jsonpath='{.spec.ports[1].nodePort}') 
@@ -50,11 +67,17 @@ xray-delete(){
     printf "\n CLEANING: COMPLETE at $(date +"%Y-%m-%d %H:%M:%S") \n"
 }
 
+# Check for 1 argument
+if [ $# -ne 1 ]; then
+  echo "Error: This script requires exactly 1 arguments."
+  echo "    ./xray.sh <install | info | delete> "
+fi
 # -z option with $1, if the first argument is NULL. Set to default
 if  [[ -z "$1" ]] ; then # check for null
-    echo "User action is NULL, setting to default START"
+    echo "User action is NULL, setting to default INSTALL"
     arg='INSTALL'
 fi
+
 # -n string - True if the string length is non-zero.
 if [[ -n $arg ]] ; then
     arg_len=${#arg}

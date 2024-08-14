@@ -2,12 +2,12 @@
 arg=${1}
 DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 
-NAMESPACE="artifactory"
+export NAMESPACE="jfrog-platform"
 alias k=kubectl
 
-artifactoy-install() {
+platform-install() {
     printf "\n ----------------------------------------------------------------  "
-    printf "\n ------------ INSTALLING... JFrog Artifactory on K8S ------------  "
+    printf "\n ------------ INSTALLING... JFrog Platform on K8S ------------  "
     printf "\n ----------------------------------------------------------------  \n"
     export MASTER_KEY=$(openssl rand -hex 32) && echo "MASTER KEY: ${MASTER_KEY} \n"
 
@@ -19,47 +19,60 @@ artifactoy-install() {
     kubectl create secret generic my-joinkey-secret -n ${NAMESPACE} --from-literal=join-key=${JOIN_KEY}
 
     # Install the chart with the release name  artifactory and with master key and join key.
-    helm upgrade --install artifactory --set artifactory.replicaCount=1 --set artifactory.masterKey=${MASTER_KEY} --set artifactory.joinKey=${JOIN_KEY} --namespace ${NAMESPACE} jfrog/artifactory
+    helm upgrade --install ${NAMESPACE} --set artifactory.replicaCount=1 --set artifactory.masterKey=${MASTER_KEY} --set artifactory.joinKey=${JOIN_KEY} --namespace ${NAMESPACE} jfrog-charts/jfrog-platform
     # kubectl scale svc/artifactory -n artifactory --current-replicas=2 --replicas=1 
 
-    sleep 30
+    sleep 60
+    # expose postgres as NodePort
+    # kubectl patch svc ${NAMESPACE}-postgresql -n ${NAMESPACE} -p '{"spec": {"type": "NodePort"}}'
+    # port-forward: Listen on port 5432 on all addresses: localhost, 127.0.0.1, loca-ip
+    while true; do
+        podStatus=$(kubectl get -n ${NAMESPACE} pods/${NAMESPACE}-postgresql-0  -o jsonpath='{.status.phase}')
+        # change to uppercase
+        podStatus=$(echo ${podStatus} | tr [a-z] [A-Z] | xargs) 
+        echo " Checking for Postgresql pod status: ${podStatus} "
+        # check for running status
+        if [[ "RUNNING" == "${podStatus}" ]] ; then
+            kubectl port-forward --address 0.0.0.0 -n ${NAMESPACE} service/${NAMESPACE}-postgresql 5432:5432 &
+            break # exit loop
+        else
+            sleep 15
+        fi
+    done 
 
     # expose artifactory as NodePort
-    export LOCAL_IP=$(ipconfig getifaddr en0)
-    kubectl patch svc artifactory-artifactory-nginx -n ${NAMESPACE} -p '{"spec": {"type": "NodePort"}}'
-    sleep 5
-
-    # expose postgres as NodePort
-    kubectl patch svc artifactory-postgresql -n ${NAMESPACE} -p '{"spec": {"type": "NodePort"}}'
+    kubectl patch svc ${NAMESPACE}-artifactory-nginx -n ${NAMESPACE} -p '{"spec": {"type": "NodePort"}}'
     sleep 5
     
     # Change default password ref: https://jfrog.com/help/r/jfrog-rest-apis/change-password
 }
-artifactoy-serviceInfo(){
+platform-serviceInfo(){
     printf "\n ----------------------------------------------------------------  "
     printf "\n ----------------  JFrog Artifactory: K8S Info  ----------------  "
     printf "\n ----------------------------------------------------------------  \n"
 
     kubectl get pv && printf "\n" && kubectl get pvc,endpoints,pods,svc,rs,statefulset,deploy -n ${NAMESPACE} && printf "\n"
 
-    export DB_NODE_PORT=$(kubectl get svc artifactory-postgresql -n ${NAMESPACE}  -o jsonpath='{.spec.ports[0].nodePort}') 
+    #export DB_NODE_PORT=$(kubectl get svc ${NAMESPACE}-postgresql -n ${NAMESPACE} -o jsonpath='{.spec.ports[0].nodePort}') 
     # jdbc:oracle:thin:[<user>/<password>]@<host>[:<port>]:<SID>    jdbc:postgresql://host:port/database
-    printf "\n\nDatabase Port: ${NODE_PORT_HTTP}   JDBC DB URI: jdbc:postgresql://localhost:${DB_NODE_PORT}/artifactory  \n"
-    export DB_UPASSWORD=$(kubectl get secrets artifactory-postgresql -n ${NAMESPACE} -o jsonpath='{.data.postgresql-password}' | base64 --decode)
-    printf "kubectl exec -it pods/artifactory-postgresql-0 -n artifactory -- psql -d ${NAMESPACE} -U artifactory \n"
-    printf "DB Defaults; DB: artifactory   username: artifactory    password: ${DB_UPASSWORD} \n\n"
+    export DB_PWD=$(kubectl get secrets ${NAMESPACE}-artifactory-unified-secret -n ${NAMESPACE} -o jsonpath='{.data.db-password}' | base64 --decode)
+    export DB_URL=$(kubectl get secrets ${NAMESPACE}-artifactory-unified-secret -n ${NAMESPACE} -o jsonpath='{.data.db-url}' | base64 --decode)
+    export DB_USER=$(kubectl get secrets ${NAMESPACE}-artifactory-unified-secret -n ${NAMESPACE} -o jsonpath='{.data.db-user}' | base64 --decode)
+    printf "\n\nDatabase Port: ${NODE_PORT_HTTP}   JDBC DB URI: jdbc:postgresql://localhost:5432/artifactory   \n"
+    printf "kubectl exec -it svc/${NAMESPACE}-postgresql  -n ${NAMESPACE} -- psql -d artifactory -U ${DB_USER} \n"
+    printf "DB Defaults; DB: ${DB_URL}  username: ${DB_USER}    password: ${DB_PWD} \n\n"
     
-    export NODE_PORT_HTTP=$(kubectl get svc -n ${NAMESPACE} artifactory-artifactory-nginx -o jsonpath='{.spec.ports[0].nodePort}') 
-    export NODE_PORT_HTTPS=$(kubectl get svc -n ${NAMESPACE} artifactory-artifactory-nginx -o jsonpath='{.spec.ports[1].nodePort}') 
+    export NODE_PORT_HTTP=$(kubectl get svc -n ${NAMESPACE} ${NAMESPACE}-artifactory-nginx -o jsonpath='{.spec.ports[0].nodePort}') 
+    export NODE_PORT_HTTPS=$(kubectl get svc -n ${NAMESPACE} ${NAMESPACE}-artifactory-nginx -o jsonpath='{.spec.ports[1].nodePort}') 
     printf "\n\nHTTP Port: ${NODE_PORT_HTTP}      Browser URI: http://localhost:${NODE_PORT_HTTP}\n"
     printf "HTTPS Port: ${NODE_PORT_HTTPS}     Browser URI: https://localhost:${NODE_PORT_HTTPS}\n"
-    printf "UI Defaults; username: admin    password: password \n\n"
+    printf "UI Defaults; username: admin    password: password \n\n" 
 }
-artifactoy-delete(){
+platform-delete(){
     printf "\n ----------------------------------------------------------------  "
-    printf "\n ------------ CLEANING the JFrog Artifactory on K8S ------------  "
+    printf "\n ------------ CLEANING the JFrog Platform on K8S ------------  "
     printf "\n ----------------------------------------------------------------  \n"
-    helm uninstall ${NAMESPACE} && sleep 90 && kubectl delete pvc -l app=artifactory
+    helm uninstall ${NAMESPACE} && sleep 90 && kubectl delete pvc -l app=${NAMESPACE}
     kubectl delete ns ${NAMESPACE} --force=true --ignore-not-found=true
     printf "\n CLEANING: COMPLETE at $(date +"%Y-%m-%d %H:%M:%S") \n"
 }
@@ -67,7 +80,7 @@ artifactoy-delete(){
 # Check for 1 argument
 if [ $# -ne 1 ]; then
   echo "Error: This script requires exactly 1 arguments."
-  echo "    ./artifactory.sh <install | info | delete> "
+  echo "    ./platform.sh <install | info | delete> "
 fi
 # -z option with $1, if the first argument is NULL. Set to default
 if  [[ -z "$1" ]] ; then # check for null
@@ -83,13 +96,13 @@ if [[ -n $arg ]] ; then
     echo "User Action: ${arg}, and arg length: ${arg_len}"
     
     if [[ "INSTALL" == "${arg}" ]] ; then   # Download & install 
-        artifactoy-install
+        platform-install
         sleep 5
-        artifactoy-serviceInfo
+        platform-serviceInfo
     elif [[ "DELETE" == "${arg}" ]] ; then   # delete 
-        artifactoy-delete
+        platform-delete
     elif [[ "INFO" == "${arg}" ]] ; then   # Info 
-        artifactoy-serviceInfo
+        platform-serviceInfo
     fi
 fi
 
