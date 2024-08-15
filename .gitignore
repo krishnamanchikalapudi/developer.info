@@ -10,6 +10,8 @@ __pycache__/
 TFdeveloperCertificate/data/*
 CertifiedKubernetesApplicationDeveloper/*.pdf
 /TFdeveloperCertificate/data/*
+/JFrog/ArtifactoryWithOracle/docker-images
+/JFrog/ArtifactoryWithOracle/oracle-db-1.0.0.tgz
 
 *-lock.json
 *.lock

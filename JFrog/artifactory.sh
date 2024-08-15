@@ -5,6 +5,9 @@ DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 NAMESPACE="artifactory"
 alias k=kubectl
 
+prestep() {
+    helm repo add jfrog https://charts.jfrog.io
+}
 artifactoy-install() {
     printf "\n ----------------------------------------------------------------  "
     printf "\n ------------ INSTALLING... JFrog Artifactory on K8S ------------  "
@@ -90,6 +93,8 @@ if [[ -n $arg ]] ; then
         artifactoy-delete
     elif [[ "INFO" == "${arg}" ]] ; then   # Info 
         artifactoy-serviceInfo
+    elif [[ "PRESTEP" == "${arg}" ]] ; then   # Info 
+        prestep
     fi
 fi
 

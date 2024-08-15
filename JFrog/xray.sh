@@ -4,6 +4,9 @@ DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 
 NAMESPACE="xray"
 alias k=kubectl
+prestep() {
+    helm repo add jfrog https://charts.jfrog.io
+}
 xray-install() {
     printf "\n ----------------------------------------------------------------  "
     printf "\n ------------ INSTALLING... JFrog Xray on K8S ------------  "
@@ -93,6 +96,8 @@ if [[ -n $arg ]] ; then
         xray-delete
     elif [[ "INFO" == "${arg}" ]] ; then   # Info 
         xray-serviceInfo
+    elif [[ "PRESTEP" == "${arg}" ]] ; then   # Info 
+        prestep
     fi
 fi
 

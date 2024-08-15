@@ -4,7 +4,9 @@ DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 
 export NAMESPACE="jfrog-platform"
 alias k=kubectl
-
+prestep() {
+    helm repo add jfrog https://charts.jfrog.io
+}
 platform-install() {
     printf "\n ----------------------------------------------------------------  "
     printf "\n ------------ INSTALLING... JFrog Platform on K8S ------------  "
@@ -12,6 +14,8 @@ platform-install() {
     export MASTER_KEY=$(openssl rand -hex 32) && echo "MASTER KEY: ${MASTER_KEY} \n"
 
     export JOIN_KEY=$(openssl rand -hex 32) && echo "Join KEY: ${JOIN_KEY} \n"
+
+    helm repo update
 
     kubectl create ns ${NAMESPACE} 
     # Create a secret containing the key. The key in the secret must be named master-key
@@ -103,6 +107,8 @@ if [[ -n $arg ]] ; then
         platform-delete
     elif [[ "INFO" == "${arg}" ]] ; then   # Info 
         platform-serviceInfo
+    elif [[ "PRESTEP" == "${arg}" ]] ; then   # Info 
+        prestep
     fi
 fi
 
