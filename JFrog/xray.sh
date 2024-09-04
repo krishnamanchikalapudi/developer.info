@@ -30,6 +30,11 @@ xray-install() {
     #kubectl patch svc artifactory-artifactory-nginx -n ${NAMESPACE} -p '{"spec": {"type": "NodePort"}}'
     sleep 5
     # Change default password ref: https://jfrog.com/help/r/jfrog-rest-apis/change-password
+    # Generate K8S YAML
+    # helm template jfrog/xray --namespace ${NAMESPACE} --dry-run=client > ${NAMESPACE}-k8s.yml
+
+    # Generate chart values
+    # helm show values jfrog/xray --namespace ${NAMESPACE} > ${NAMESPACE}-values.yml
 
     # expose postgres as NodePort
     kubectl patch svc xray-postgresql -n ${NAMESPACE} -p '{"spec": {"type": "NodePort"}}'

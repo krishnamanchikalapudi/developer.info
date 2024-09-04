@@ -1,0 +1,329 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: oracledb
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: oracle-pv
+  labels:
+    type: local
+spec:
+  storageClassName: local-path
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /tmp/oracle-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: oracle-pvc
+  namespace: oracledb
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: oracle-secrets
+  namespace: oracledb
+  labels:
+    app: oracledb
+stringData:
+  ORACLE_PWD: Welcome1
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oracle-cm
+  namespace: oracledb
+  labels:
+    app: oracledb
+data:
+  ORACLE_CHARACTERSET: "AL32UTF8"
+  ORACLE_EDITION: "free"
+  ORACLE_SID: "ORCLCDB"
+  ORACLE_PDB: "ORCLPDB1"
+  # ref https://github.com/oracle/docker-images/tree/main/OracleDatabase/SingleInstance/dockerfiles/19.3.0
+  runOracle.sh: |
+    #!/bin/bash
+    export ORACLE_SID=${ORACLE_SID:-ORCLCDB}
+    ORACLE_SID=${ORACLE_SID^^}
+
+    if [ "$DG_OBSERVER_ONLY" = "false" ]; then
+        "$ORACLE_BASE/$LOCKING_SCRIPT" --acquire --file "$ORACLE_BASE/oradata/.${ORACLE_SID}.create_lck" --block
+    fi
+  checkdbstatus.sh: |
+    #!/bin/bash
+    # Function to check database role: either Primary or Secondary
+    checkDatabaseRole() {
+      # Obtain DB_ROLE using SQLPlus
+      DB_ROLE=$(sqlplus -s / << EOF
+        set heading off;
+        set pagesize 0;
+        SELECT database_role FROM v\$database ;
+        exit;
+        EOF
+      )
+      # Store return code from SQL*Plus
+      ret=$?
+      if [ $ret -eq 0 ] && [ "$DB_ROLE" != "PRIMARY" ] && [ "$DB_ROLE" != "PHYSICAL STANDBY" ]; then
+          exit 1
+      elif [ $ret -ne 0 ]; then
+          exit 3
+      fi
+    }
+    # Function to check if at least one PDB is open in "READ WRITE" mode for Primary database
+    # Or in case of Secondary Database PDBs should be opened only in "READ ONLY" mode 
+    checkPDBOpen() {
+      # Obtain OPEN_MODE for PDB using SQLPlus
+      PDB_OPEN_MODE=$(sqlplus -s / << EOF
+        set heading off;
+        set pagesize 0;
+        SELECT DISTINCT open_mode FROM v\$pdbs;
+        exit;
+        EOF
+        )
+      # Store return code from SQL*Plus
+      ret=$?
+      if [ $ret -eq 0 ] && [ "$DB_ROLE" = "PRIMARY" ] && ! echo "$PDB_OPEN_MODE" | grep -q "READ WRITE"; then
+          exit 2
+      elif [ $ret -eq 0 ] && [ "$DB_ROLE" = "PHYSICAL STANDBY" ] && [ "$PDB_OPEN_MODE" != "READ ONLY" ]; then
+          exit 2
+      elif [ $ret -ne 0 ]; then
+          exit 3
+      fi
+    }
+    # Function to check that observer is running or not
+    checkObserver() {
+      dg_observer_status=$(dgmgrl sys@"$PRIMARY_DB_CONN_STR" "show observer" << EOF
+        ${ORACLE_PWD}
+        EOF
+        )
+      if ! echo "$dg_observer_status" | grep -q 'Observer ".*"' ; then
+          exit 4
+      fi 
+
+    }
+    #############################################
+    ################ MAIN #######################
+    #############################################
+    # Setting up ORACLE_PWD if podman secret is passed on
+    if [ -e '/run/secrets/oracle_pwd' ]; then
+        export ORACLE_PWD="$(cat '/run/secrets/oracle_pwd')"
+    fi
+
+    if [ "$DG_OBSERVER_ONLY" = "true" ]; then
+      checkObserver
+    else
+      ORACLE_SID="$(grep "$ORACLE_HOME" /etc/oratab | cut -d: -f1)"
+      DB_ROLE=""
+      ORAENV_ASK=NO
+      source oraenv
+      checkDatabaseRole
+      checkPDBOpen
+    fi
+    exit 0
+  checkDBLockStatus.sh: |
+    #!/bin/bash
+    export ORACLE_SID=${ORACLE_SID:-ORCLCDB}
+    ORACLE_SID=${ORACLE_SID^^}
+
+    if [ "$DG_OBSERVER_ONLY" = "true" ]; then
+      "$ORACLE_BASE/$CHECK_DB_FILE"
+      exit $?
+    elif "$ORACLE_BASE/$LOCKING_SCRIPT" --check --file "$ORACLE_BASE/oradata/.${ORACLE_SID}.create_lck"; then
+      exit 1  # create lock held, DB is still initializing
+    elif ! "$ORACLE_BASE/$LOCKING_SCRIPT" --check --file "$ORACLE_BASE/oradata/.${ORACLE_SID}.exist_lck"; then
+      exit 1 # exist lock not held, DB is still initializing
+    elif "$ORACLE_BASE/$CHECK_DB_FILE"; then
+      # DB health is good
+      exit 0
+    elif test -f "$ORACLE_BASE/oradata/.${ORACLE_SID}.nochk"; then
+      exit 1 # Skip health check
+    elif pgrep -f pmon > /dev/null; then
+      # DB procs detected
+      exit 1
+    else
+      # No DB procs detected
+      "$ORACLE_BASE/$LOCKING_SCRIPT" --release --file "$ORACLE_BASE/oradata/.${ORACLE_SID}.exist_lck"
+      # Kill the process that keeps the container alive
+      pkill -9 -f "tail.*alert"
+    fi
+  startDB.sh: |
+    #!/bin/bash
+    # Check that ORACLE_HOME is set
+    if [ "$ORACLE_HOME" == "" ]; then
+      script_name=`basename "$0"`
+      echo "$script_name: ERROR - ORACLE_HOME is not set. Please set ORACLE_HOME and PATH before invoking this script."
+      exit 1;
+    fi;
+
+    export ORACLE_SID=$(grep "$ORACLE_HOME" /etc/oratab | cut -d: -f1)
+
+    # Clean up any left over zombie procs from container crash, start database in nomount mode
+    ipcs -m | awk ' /[0-9]/ {print $2}' | xargs -n1 ipcrm -m 2> /dev/null
+    ipcs -s | awk ' /[0-9]/ {print $2}' | xargs -n1 ipcrm -s 2> /dev/null
+    for i in {1..10}; do
+      sqlplus / as sysdba << EOF
+      shutdown abort;
+      startup nomount;
+      exit;
+    EOF
+      if pgrep -f pmon > /dev/null; then
+        break
+      fi
+      # Sometimes DB locks of dead container are not released immediately
+      echo "Waiting for $i sec(s) before restarting Oracle processes"
+      sleep $i
+    done
+
+    # startup can get into a wait mode here
+    $ORACLE_BASE/scripts/extensions/setup/$SWAP_LOCK_FILE
+
+    # Start Listener
+    lsnrctl start
+
+    condn_sql=""
+    if ! pgrep -f pmon > /dev/null; then
+      # if Oracle processes die for some reason by the time lock is acquired
+      condn_sql="shutdown abort;
+      startup nomount;
+      "
+    fi
+
+    # Disable exit on failed health check
+    touch "$ORACLE_BASE/oradata/.${ORACLE_SID}.nochk" && sync
+
+    for i in {1..10}; do
+      # Start database
+      sqlplus / as sysdba << EOF
+      $condn_sql
+      alter database mount;
+      alter database open;
+      alter pluggable database all open;
+      alter system register;
+      exit;
+    EOF
+      if "$ORACLE_BASE/$CHECK_DB_FILE"; then
+        # DB health is good
+        echo "DB is in good health on startup"
+        break
+      fi
+      # Sometimes DB locks of a dead container are not released immediately
+      echo "Waiting for $i sec(s) before restarting Oracle processes and opening the database"
+      sleep $i
+    done
+
+    # Enable health check exit
+    rm -f "$ORACLE_BASE/oradata/.${ORACLE_SID}.nochk"
+    
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oracle
+  namespace: oracledb
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: oracledb
+  template:
+    metadata:
+      labels:
+        app: oracledb
+    spec:
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsUser: 54321
+        fsGroup: 54321
+      volumes:
+        - name: datamount
+          persistentVolumeClaim:
+            claimName: oracle-pvc
+        - name: checkdblockstatus
+          configMap:
+            name: oracle-cm
+        - name: checkdbstatus
+          configMap:
+            name: oracle-cm
+        - name: runoracle
+          configMap:
+            name: oracle-cm
+        - name: startdb
+          configMap:
+            name: oracle-cm
+      containers:
+        - name: oracle-db
+          image: psazuse.jfrog.io/oracle-remote/database/free:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: oracle-cm
+            - secretRef:
+                name: oracle-secrets
+          ports:
+            - containerPort: 1521
+            - containerPort: 5500
+          readinessProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            timeoutSeconds: 20
+            exec:
+              command:
+                - /bin/sh
+                - "-c"
+                - $ORACLE_BASE/$CHECK_DB_FILE
+          livenessProbe:
+            initialDelaySeconds: 300
+            periodSeconds: 60
+            exec:
+              command:
+                - /bin/sh
+                - "-c"
+                - $ORACLE_BASE/$CHECK_DB_FILE
+          volumeMounts:
+            - name: datamount
+              mountPath: /opt/oracle/oradata
+            - name: checkdblockstatus
+              mountPath: /opt/oracle/scripts/checkDBLockStatus.sh
+              subPath: checkDBLockStatus.sh
+            - name: checkdbstatus
+              mountPath: /opt/oracle/scripts/checkdbstatus.sh
+              subPath: checkdbstatus.sh
+            # - name: runoracle
+            #   mountPath: /opt/oracle/runOracle.sh
+            #   subPath: runOracle.sh
+            - name: startdb
+              mountPath: /opt/oracle/startDB.sh
+              subPath: startDB.sh
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oracle-svc
+  namespace: oracledb
+spec:
+  type: NodePort
+  ports:
+  - name: listener
+    port: 1521
+    protocol: TCP
+  - name: xmldb
+    port: 5500
+    protocol: TCP
+  selector:
+    app: oracledb
+---

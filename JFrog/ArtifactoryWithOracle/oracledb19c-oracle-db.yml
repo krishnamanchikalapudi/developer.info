@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: oracledb19c
+    meta.helm.sh/release-namespace: artifactory-oracle
+  creationTimestamp: "2024-08-20T01:58:09Z"
+  generation: 1
+  labels:
+    app: oracledb19c-oracle-db
+    app.kubernetes.io/managed-by: Helm
+    chart: oracle-db-1.0.0
+    heritage: Helm
+    release: oracledb19c
+  name: oracledb19c-oracle-db
+  namespace: artifactory-oracle
+  resourceVersion: "1485834"
+  uid: e95289b6-ee7d-4891-8767-156b6c016b89
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: oracledb19c-oracle-db
+  strategy:
+    rollingUpdate:
+      maxSurge: 100
+      maxUnavailable: 100
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: oracledb19c-oracle-db
+    spec:
+      containers:
+      - env:
+        - name: SVC_HOST
+          value: oracledb19c-oracle-db
+        - name: SVC_PORT
+          value: "1521"
+        - name: ORACLE_SID
+          value: ORCLCDB
+        - name: ORACLE_PDB
+          value: ORCLPDB1
+        - name: ORACLE_PWD
+          valueFrom:
+            secretKeyRef:
+              key: oracle_pwd
+              name: oracledb19c-oracle-db
+        - name: ORACLE_CHARACTERSET
+          value: AL32UTF8
+        - name: ORACLE_EDITION
+          value: enterprise
+        - name: ENABLE_ARCHIVELOG
+          value: "false"
+        image: psazuse.jfrog.io/oracle-remote/database/free:latest
+        imagePullPolicy: IfNotPresent
+        name: oracle-db
+        ports:
+        - containerPort: 1521
+          protocol: TCP
+        - containerPort: 5500
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - 'if [ -f $ORACLE_BASE/checkDBLockStatus.sh ]; then $ORACLE_BASE/checkDBLockStatus.sh
+              ; else $ORACLE_BASE/checkDBStatus.sh; fi '
+          failureThreshold: 3
+          initialDelaySeconds: 20
+          periodSeconds: 40
+          successThreshold: 1
+          timeoutSeconds: 20
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /opt/oracle/oradata
+          name: datamount
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 54321
+        runAsUser: 54321
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: datamount
+        persistentVolumeClaim:
+          claimName: oracledb19c-oracle-db
+status:
+  conditions:
+  - lastTransitionTime: "2024-08-20T01:58:09Z"
+    lastUpdateTime: "2024-08-20T01:58:09Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2024-08-20T01:58:09Z"
+    lastUpdateTime: "2024-08-20T01:58:09Z"
+    message: ReplicaSet "oracledb19c-oracle-db-585d8c94f9" is progressing.
+    reason: ReplicaSetUpdated
+    status: "True"
+    type: Progressing
+  observedGeneration: 1
+  replicas: 1
+  unavailableReplicas: 1
+  updatedReplicas: 1

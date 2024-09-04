@@ -23,7 +23,8 @@ platform-install() {
     kubectl create secret generic my-joinkey-secret -n ${NAMESPACE} --from-literal=join-key=${JOIN_KEY}
 
     # Install the chart with the release name  artifactory and with master key and join key.
-    helm upgrade --install ${NAMESPACE} --set artifactory.replicaCount=1 --set artifactory.masterKey=${MASTER_KEY} --set artifactory.joinKey=${JOIN_KEY} --namespace ${NAMESPACE} jfrog-charts/jfrog-platform
+    helm upgrade --install ${NAMESPACE} --set artifactory.replicaCount=1 --set artifactory.masterKey=${MASTER_KEY} --set artifactory.joinKey=${JOIN_KEY} --namespace ${NAMESPACE} jfrog-charts/jfrog-platform # --dry-run=client -o yaml > platform-custom-values.yml
+
     # kubectl scale svc/artifactory -n artifactory --current-replicas=2 --replicas=1 
 
     sleep 60
@@ -47,14 +48,20 @@ platform-install() {
     # expose artifactory as NodePort
     kubectl patch svc ${NAMESPACE}-artifactory-nginx -n ${NAMESPACE} -p '{"spec": {"type": "NodePort"}}'
     sleep 5
-    
+
+    # Generate K8S YAML
+    # helm template jfrog-charts/jfrog-platform --namespace ${NAMESPACE} --dry-run=client > ${NAMESPACE}-k8s.yml
+
+    # Generate chart values
+    # helm show values jfrog-charts/jfrog-platform --namespace ${NAMESPACE} > ${NAMESPACE}-values.yml
+
     # Change default password ref: https://jfrog.com/help/r/jfrog-rest-apis/change-password
 }
 platform-serviceInfo(){
     printf "\n ----------------------------------------------------------------  "
     printf "\n ----------------  JFrog Artifactory: K8S Info  ----------------  "
     printf "\n ----------------------------------------------------------------  \n"
-
+    kubectl port-forward --address 0.0.0.0 -n ${NAMESPACE} service/${NAMESPACE}-postgresql 5432:5432 &
     kubectl get pv && printf "\n" && kubectl get pvc,endpoints,pods,svc,rs,statefulset,deploy -n ${NAMESPACE} && printf "\n"
 
     #export DB_NODE_PORT=$(kubectl get svc ${NAMESPACE}-postgresql -n ${NAMESPACE} -o jsonpath='{.spec.ports[0].nodePort}') 

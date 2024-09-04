@@ -2,9 +2,8 @@
 arg=${1}
 DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 
-NAMESPACE="artifactoryWithOracle"
+NAMESPACE="artifactory-oracle"
 alias k=kubectl
-
 
 prestep() {
     helm repo add oracle https://oracle.github.io/helm-charts
@@ -14,22 +13,50 @@ oracle-install(){
     printf "\n ----------------------------------------------------------------  "
     printf "\n ------------ INSTALLING... Oracle database on K8S ------------  "
     printf "\n ----------------------------------------------------------------  \n"
+    kubectl create ns ${NAMESPACE} 
 
     # check for oracle image folder, clone or update repo
-    rm -rf oracle-db-1.0.0.tgz
-    FOLDER=docker-images
-    if [ ! -d "$FOLDER" ] ; then
-        git clone https://github.com/oracle/docker-images.git
-    else
-        cd "$FOLDER"
-        git pull https://github.com/oracle/docker-images.git
-    fi
+    # oracle-delete
+    git clone https://github.com/oracle/docker-images.git
+    chmod -R 755 * &&  helm package docker-images/OracleDatabase/SingleInstance/helm-charts/oracle-db && chmod -R 755 * 
+    # kubectl apply -f px-ora-sc.yml 
+    
+    # helm install oracledb19c -f docker-images/OracleDatabase/SingleInstance/helm-charts/oracle-db/values.yaml oracle-db-1.0.0.tgz --dry-run
 
-    #git clone https://github.com/oracle/docker-images.git
-    chmod -R 755 *
-    helm package docker-images/OracleDatabase/SingleInstance/helm-charts/oracle-db
+    kubectl create ns ${NAMESPACE} && kubectl apply -f px-ora-sc.yml && helm install oracledb19c -f oradb-values.yml oracle-db-1.0.0.tgz --namespace ${NAMESPACE}
 
-    helm install db19c --set oracle_sid=ORCL,oracle_pdb=prod oracle-db-1.0.0.tgz
+
+
+    # helm uninstall oracledb19c && kubectl delete ${NAMESPACE} 
+
+
+    # Reference: https://www.oracle.com/database/free/get-started/ 
+    # docker pull psazuse.jfrog.io/oracle-remote/database/free:latest
+
+    # docker run -d --name oracledb -p 1521:1521 -p 5500:5500 -e ORACLE_SID=jfrog -e ORACLE_PDB=jforg -e ORACLE_PWD=Welcome1 psazuse.jfrog.io/oracle-remote/database/free:latest
+
+    # docker run --name oracledb -p 1521:1521 -p 5500:5500 -e ORACLE_PDB=jfrog -e ORACLE_PWD=Welcome1 -v ~/Documents/GitHub/developer.info/JFrog/ArtifactoryWithOracle/oradata:/opt/oracle/oradata psazuse.jfrog.io/oracle-remote/database/free:23.4.0.0-lite
+
+    #docker run -d --name oracledb -p 1521:1521 -p 5500:5500 -e ORACLE_SID=ORCLCDB -e ORACLE_PDB=ORCLPDB1 -e ORACLE_PWD=Welcome1 -e ORACLE_EDITION=enterprise -e ORACLE_CHARACTERSET=AL32UTF8 -e ENABLE_ARCHIVELOG=false -v ~/Documents/GitHub/developer.info/JFrog/ArtifactoryWithOracle/oradata:/opt/oracle/oradata psazuse.jfrog.io/oracle-remote/database/enterprise:19.3.0.0
+
+    docker run -d --name oracledb19 -p 1521:1521 -p 5500:5500 -e ORACLE_SID=jfrog -e ORACLE_PDB=jfrog -e ORACLE_PWD=Welcome1 -e ORACLE_EDITION=enterprise -e ORACLE_CHARACTERSET=AL32UTF8 -e ENABLE_ARCHIVELOG=false -v ~/Documents/GitHub/developer.info/JFrog/ArtifactoryWithOracle/oradata:/opt/oracle/oradata --rm container-registry.oracle.com/database/enterprise:19.3.0.0
+
+    docker exec -it oracledb19 bash
+    sqlplus / as sysdba 
+    startup
+    alter session set "_ORACLE_SCRIPT"=true;
+    create tablespace artifactory datafile 'artifactory.dbf' size 150m autoextend on;
+    create user artifactory1 identified by welcome1 default tablespace artifactory temporary tablespace temp quota unlimited on artifactory;
+    grant exp_full_database to artifactory1;
+
+
+    container_id=`docker container ls -a | grep oracledb19 | awk '{print $1}'` && docker container stop $container_id && docker rm oracledb21 --force
+
+
+    create tablespace artifactory datafile 'artifactory.dbf' size 150m autoextend on;
+
+
+    # kubectl apply -f k8s-oracle.yml
 }
 oracle-delete() {
     rm -rf docker-images
@@ -50,7 +77,7 @@ artifactoy-install() {
     kubectl create secret generic my-joinkey-secret -n ${NAMESPACE} --from-literal=join-key=${JOIN_KEY}
 
     # Install the chart with the release name  artifactory and with master key and join key.
-    helm upgrade --install artifactory --set artifactory.replicaCount=1 --set artifactory.masterKey=${MASTER_KEY} --set artifactory.joinKey=${JOIN_KEY} --namespace ${NAMESPACE} jfrog/artifactory
+    helm upgrade --install artifactory --set artifactory.replicaCount=1 --set artifactory.masterKey=${MASTER_KEY} --set artifactory.joinKey=${JOIN_KEY} --namespace ${NAMESPACE} jfrog/artifactory # --dry-run
     # kubectl scale svc/artifactory -n artifactory --current-replicas=2 --replicas=1 
 
     sleep 30
@@ -65,6 +92,11 @@ artifactoy-install() {
     sleep 5
     
     # Change default password ref: https://jfrog.com/help/r/jfrog-rest-apis/change-password
+    # Generate K8S YAML
+    # helm template jfrog/artifactory --namespace ${NAMESPACE} --dry-run=client > ${NAMESPACE}-k8s.yml
+
+    # Generate chart values
+    # helm show values jfrog/artifactory --namespace ${NAMESPACE} > ${NAMESPACE}-values.yml
 }
 artifactoy-serviceInfo() {
     printf "\n ----------------------------------------------------------------  "

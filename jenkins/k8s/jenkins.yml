@@ -54,7 +54,8 @@ spec:
   accessModes:
     - ReadWriteOnce
   local:
-    path: /Users/krishnam/Documents/jenkins/my-jenkins-data # Change to local folder path
+  #  path: /mnt
+    path: /Users/krishnam/Documents/jenkins/my-jenkins-data
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -98,7 +99,7 @@ spec:
       serviceAccountName: jenkins-admin
       containers:
         - name: jenkins
-          image: jenkins/jenkins:lts
+          image: psazuse.jfrog.io/ui/native/krishnam-docker-remote/jenkins/jenkins:lts # https://hub.docker.com/r/jenkins/jenkins
           resources:
             limits:
               memory: "2Gi"
@@ -134,4 +135,23 @@ spec:
         - name: jenkins-data
           persistentVolumeClaim:
               claimName: jenkins-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-service
+  namespace: jenkins
+  annotations:
+      prometheus.io/scrape: 'true'
+      prometheus.io/path:   /
+      prometheus.io/port:   '8080'
+spec:
+  selector:
+    app: jenkins-server
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      # nodePort: 32000
 ---

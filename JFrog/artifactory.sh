@@ -37,6 +37,13 @@ artifactoy-install() {
     sleep 5
     
     # Change default password ref: https://jfrog.com/help/r/jfrog-rest-apis/change-password
+
+    # Generate K8S YAML
+    # helm template jfrog/artifactory --namespace ${NAMESPACE} --dry-run=client > ${NAMESPACE}-k8s.yml
+
+    # Generate chart values
+    # helm show values jfrog/artifactory --namespace ${NAMESPACE} > ${NAMESPACE}-values.yml
+
 }
 artifactoy-serviceInfo(){
     printf "\n ----------------------------------------------------------------  "
