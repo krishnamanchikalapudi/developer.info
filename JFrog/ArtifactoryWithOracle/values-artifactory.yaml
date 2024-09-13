@@ -1,0 +1,9 @@
+  name: artifactory
+  image:
+    registry: YOUR_ENV.jfrog.io
+    repository: test-docker/artifactory-pro
+    tag: latest
+  preStartCommand: "mkdir -p /opt/jfrog/artifactory/var/bootstrap/artifactory/tomcat/lib/; cp /opt/oracle/instantclient/ojdbc8.jar /opt/jfrog/artifactory/var/bootstrap/artifactory/tomcat/lib/"
+  extraEnvironmentVariables:
+    - name: LD_LIBRARY_PATH
+      value: /opt/oracle/instantclient:/opt/jfrog/artifactory/var/bootstrap/artifactory/tomcat/lib
