@@ -2,28 +2,19 @@
 arg=${1}
 DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 # https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands
-NAMESPACE="artifactory"
+NAMESPACE="opentelemetry"
 alias k=kubectl
 
 prestep() {
-    helm repo add jfrog https://charts.jfrog.io
+    helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
 }
-artifactoy-install() {
+opentelemetry-install() {
     printf "\n ----------------------------------------------------------------  "
-    printf "\n ------------ INSTALLING... JFrog Artifactory on K8S ------------  "
+    printf "\n ------------ INSTALLING... Open Telemetry on K8S ------------  "
     printf "\n ----------------------------------------------------------------  \n"
-    export MASTER_KEY=$(openssl rand -hex 32) && echo "MASTER KEY: ${MASTER_KEY} \n"
-
-    export JOIN_KEY=$(openssl rand -hex 32) && echo "Join KEY: ${JOIN_KEY} \n"
 
     kubectl create ns ${NAMESPACE} 
-    # Create a secret containing the key. The key in the secret must be named master-key
-    kubectl create secret generic my-masterkey-secret -n ${NAMESPACE} --from-literal=master-key=${MASTER_KEY}
-    kubectl create secret generic my-joinkey-secret -n ${NAMESPACE} --from-literal=join-key=${JOIN_KEY}
-
-    # Install the chart with the release name  artifactory and with master key and join key.
-    helm upgrade --install artifactory --set artifactory.replicaCount=1 --set artifactory.masterKey=${MASTER_KEY} --set artifactory.joinKey=${JOIN_KEY} --namespace ${NAMESPACE} jfrog/artifactory
-    # kubectl scale svc/artifactory -n artifactory --current-replicas=2 --replicas=1 
+    helm install otel-collector open-telemetry/opentelemetry-collector --values ./values.yaml --namespace ${NAMESPACE}
 
     sleep 30
 
