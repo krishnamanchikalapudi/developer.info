@@ -1,0 +1,35 @@
+xray:
+  enabled: true
+  replicaCount: 1
+insight:
+  enabled: true
+pipelines:
+  enabled: false
+shared:
+  metrics:
+    enabled: true
+worker:
+  enabled: true
+  extraSystemYaml:
+    worker:
+      execution:
+        enableLocalNetworkValidation: false
+artifactory:
+  enabled: true
+  artifactory:
+    metrics:
+      enabled: true
+    mc:
+      enabled: true  
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 200
+    targetMemoryUtilizationPercentage: 800
+  mc:
+    enabled: true
+postgresql:
+  image:
+    tag: 15.6.0-debian-11-r16
+databaseUpgradeReady: true

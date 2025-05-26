@@ -6,12 +6,13 @@ NAMESPACE="artedges"
 alias k=kubectl
 
 prestep() {
-    helm repo add jfrog https://charts.jfrog.io
+    helm repo add jfrog https://charts.jfrog.io && helm repo update && helm repo list
 }
 edge-install() {
 printf "\n ----------------------------------------------------------------  "
     printf "\n ------------ INSTALLING... JFrog Artifactory Edge on K8S ------------  "
     printf "\n ----------------------------------------------------------------  \n"
+    prestep
     export MASTER_KEY=$(openssl rand -hex 32) && echo "MASTER KEY: ${MASTER_KEY} \n"
 
     export JOIN_KEY=$(openssl rand -hex 32) && echo "Join KEY: ${JOIN_KEY} \n"
@@ -37,7 +38,28 @@ printf "\n ----------------------------------------------------------------  "
     sleep 5
 }
 edge-serviceInfo(){
+    printf "\n ----------------------------------------------------------------  "
+    printf "\n ----------------  JFrog Artifactory: K8S Info  ----------------  "
+    printf "\n ----------------------------------------------------------------  \n"
+
+    kubectl get pv && printf "\n" && kubectl get pvc,endpoints,pods,svc,rs,statefulset,deploy -n ${NAMESPACE} && printf "\n"
+
+    export DB_NODE_PORT=$(kubectl get svc artifactory-postgresql -n ${NAMESPACE}  -o jsonpath='{.spec.ports[0].nodePort}') 
+    # jdbc:oracle:thin:[<user>/<password>]@<host>[:<port>]:<SID>    jdbc:postgresql://host:port/database
+    printf "\n\nDatabase Port: ${NODE_PORT_HTTP}   JDBC DB URI: jdbc:postgresql://localhost:${DB_NODE_PORT}/artifactory  \n"
+    export DB_UPASSWORD=$(kubectl get secrets artifactory-postgresql -n ${NAMESPACE} -o jsonpath='{.data.postgresql-password}' | base64 --decode)
+    printf "kubectl exec -it pods/artifactory-postgresql-0 -n artifactory -- psql -d ${NAMESPACE} -U artifactory \n"
+    printf "DB Defaults; DB: artifactory   username: artifactory    password: ${DB_UPASSWORD} \n\n"
+    
+    export NODE_PORT_HTTP=$(kubectl get svc -n ${NAMESPACE} artifactory-artifactory-nginx -o jsonpath='{.spec.ports[0].nodePort}') 
+    export NODE_PORT_HTTPS=$(kubectl get svc -n ${NAMESPACE} artifactory-artifactory-nginx -o jsonpath='{.spec.ports[1].nodePort}') 
+    printf "\n\nHTTP Port: ${NODE_PORT_HTTP}      Browser URI: http://localhost:${NODE_PORT_HTTP}\n"
+    printf "HTTPS Port: ${NODE_PORT_HTTPS}     Browser URI: https://localhost:${NODE_PORT_HTTPS}\n"
+    printf "UI Defaults; username: admin    password: password \n\n"
+
+    tail-logs
 }
+
 tail-logs() {
     # kubectl logs deploy/artifactory-artifactory-nginx -n artifactory --follow & 
     kubectl logs deploy/artifactory-artifactory-nginx -n ${NAMESPACE} --follow & 
@@ -49,13 +71,14 @@ tail-logs() {
     kubectl logs statefulset/artifactory -n ${NAMESPACE} --follow &
 }
 edge-delete(){
-
+    helm uninstall ${NAMESPACE} && sleep 90 && kubectl delete pvc -l app=artifactory
+    kubectl delete ns ${NAMESPACE} --force=true --ignore-not-found=true
 }
 
 # Check for 1 argument
 if [ $# -ne 1 ]; then
   echo "Error: This script requires exactly 1 arguments."
-  echo "    ./artifactory.sh <install | info | delete> "
+  echo "    ./edge.sh <install | info | delete> "
 fi
 # -z option with $1, if the first argument is NULL. Set to default
 if  [[ -z "$1" ]] ; then # check for null

@@ -6,14 +6,15 @@ NAMESPACE="artifactory"
 alias k=kubectl
 
 prestep() {
-    helm repo add jfrog https://charts.jfrog.io
+    helm repo add jfrog https://charts.jfrog.io && helm repo update && helm repo list
+    helm search repo jfrog-chart
 }
 artifactoy-install() {
     printf "\n ----------------------------------------------------------------  "
     printf "\n ------------ INSTALLING... JFrog Artifactory on K8S ------------  "
     printf "\n ----------------------------------------------------------------  \n"
+    prestep
     export MASTER_KEY=$(openssl rand -hex 32) && echo "MASTER KEY: ${MASTER_KEY} \n"
-
     export JOIN_KEY=$(openssl rand -hex 32) && echo "Join KEY: ${JOIN_KEY} \n"
 
     kubectl create ns ${NAMESPACE} 

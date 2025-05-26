@@ -1,0 +1,112 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ollama
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: llama3
+  namespace: ollama
+  labels:
+    app: llama3
+data:
+  {
+    "OLLAMA_DEBUG":"1"
+  }
+  # OLLAMA_DEBUG: "0"                      # Show additional debug information (e.g. OLLAMA_DEBUG=1)
+  # OLLAMA_HOST: "0.0.0.0"                 # IP Address for the ollama server (default 127.0.0.1:11434)
+  # OLLAMA_KEEP_ALIVE: 5m                  # The duration that models stay loaded in memory (default "5m")
+  # OLLAMA_MAX_LOADED_MODELS: "1"          # Maximum number of loaded models per GPU
+  # OLLAMA_MAX_QUEUE: "1"                  # Maximum number of queued requests
+  # OLLAMA_MODELS: /root/.ollama/models    # The path to the models directory
+  # OLLAMA_NUM_PARALLEL: "1"               # Maximum number of parallel requests
+  # OLLAMA_NOPRUNE: "1"                    # Do not prune model blobs on startup
+  # OLLAMA_ORIGINS: localhost              # A comma separated list of allowed origins
+  # OLLAMA_SCHED_SPREAD: "1"               # Always schedule model across all GPUs
+  # OLLAMA_FLASH_ATTENTION: "1"            # Enabled flash attention
+  # OLLAMA_KV_CACHE_TYPE: f16              # Quantization type for the K/V cache (default: f16)
+  # OLLAMA_LLM_LIBRARY: ""                 # Set LLM library to bypass autodetection
+  # OLLAMA_GPU_OVERHEAD: ""                # Reserve a portion of VRAM per GPU (bytes)
+  # OLLAMA_LOAD_TIMEOUT: 5m                # How long to allow model loads to stall before giving up (default "5m")
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llama3
+  namespace: ollama
+  labels:
+    app: llama3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llama3
+  template:
+    metadata:
+      labels:
+        app: llama3
+    spec:
+      containers:
+        - name: ollama-model  
+          image: ollama/ollama:latest  # https://hub.docker.com/r/ollama/ollama/tags
+          ports:
+            - containerPort: 11434
+          resources:
+            limits:
+              cpu: 6000m
+              memory: 10000Mi
+              # nvidia.com/gpu: 1 # When deploying on GPU, otherwise let it use the CPU
+            requests:
+              cpu: 5000m
+              memory: 6000Mi
+              # nvidia.com/gpu: 1 # When deploying on GPU, otherwise let it use the CPU
+          envFrom:
+            - configMapRef:
+                name: llama3
+          volumeMounts:
+            - name: ollama-models-store
+              mountPath: /root/.ollama/models
+        - name: ollama-model-puller
+          image: ollama/ollama:latest
+          command:
+            - bash
+          args:  # model info at https://github.com/ollama/ollama?tab=readme-ov-file#model-library
+            - -c
+            - "ollama pull llama3.2:1b && tail -f /dev/null" 
+          env:
+            - name: OLLAMA_HOST
+              value: "127.0.0.1"
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1000Mi
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          volumeMounts:
+            - name: ollama-models-store
+              mountPath: /root/.ollama/models
+      volumes:
+        - name: ollama-models-store
+          hostPath:
+            path: /nfs/ollama-models-store
+            type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llama3
+  namespace: ollama
+  labels:
+    app: llama3
+spec:
+  selector:
+    app: llama3
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 11434
+  type: NodePort
+---

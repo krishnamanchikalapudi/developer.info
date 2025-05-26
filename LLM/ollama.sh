@@ -2,7 +2,7 @@
 arg=${1}
 DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 
-export MODEL_NAMES=("llama3.2:1b" "llama3.3") # ref: https://github.com/ollama/ollama?tab=readme-ov-file#model-library
+export MODEL_NAMES=("llama3.2:1b" "llama3.3" "deepseek-r1") # ref: https://github.com/ollama/ollama?tab=readme-ov-file#model-library
 export MODEL_NAME=${MODEL_NAMES[0]}
 export OLLAMA_URL="http://localhost:11434/api"
 
@@ -16,22 +16,30 @@ install() {
 
     brew install --cask ollama
     sleep 3
-    ollama run $MODEL_NAME 
 }
 run() {
     printf "\n ----------------------------------------------------------------  "
     printf "\n       ------------ RUNNING... OLLAMA ------------  "
     printf "\n ----------------------------------------------------------------  \n"
 
+    cd /Applications/Ollama.app/Contents/Resources/
+    ollama serve &
+    sleep 3
     ollama run $MODEL_NAME &
     sleep 3
-    
-    tests
+}
+status() {
+    printf "\n ----------------------------------------------------------------  "
+    printf "\n       ------------ STATUS... OLLAMA ------------  "
+    printf "\n ----------------------------------------------------------------  \n"
+
+    ps -ef | grep ollama | grep -v grep | awk '{print $2}' 
 }
 stop() {
     printf "\n ----------------------------------------------------------------  "
     printf "\n       ------------ STOPPING... OLLAMA ------------  "
     printf "\n ----------------------------------------------------------------  \n"
+    ps -ef | grep ollama | grep -v grep | awk '{print $2}' 
 
     ps -ef | grep ollama | grep -v grep | awk '{print $2}' | xargs kill -9
     sleep 3
@@ -48,10 +56,39 @@ tests() {
     
     curl -i -H "Accept: application/json" -X POST ${OLLAMA_URL}/generate -d "{\"model\": \"${MODEL_NAME}\", \"prompt\":\"Why is the sky blue?\", \"raw\": true, \"stream\": false }"  
     
-    curl -i -H "Accept: application/json" -X POST ${OLLAMA_URL}/chat -d "{\"model\": \"${MODEL_NAME}\", \"messages\": [ { \"role\": \"user\", \"content\": \"Why is the sky blue?\" } ], \"stream\": false }"
+    curl -i -H "Accept: application/json" -X POST ${OLLAMA_URL}/embeddings -d "{\"model\": \"${MODEL_NAME}\", \"prompt\":\"Why is the sky blue?\", \"raw\": true, \"stream\": false }"  
     
+
+
+    curl -i -H "Accept: application/json" -X POST ${OLLAMA_URL}/chat -d "{\"model\": \"${MODEL_NAME}\", \"messages\": [ { \"role\": \"user\", \"content\": \"How is the life?\" } ], \"stream\": false }"
+
+    curl -i -H "Accept: application/json" -X POST ${OLLAMA_URL}/chat -d "{\"model\": \"${MODEL_NAME}\", \"messages\": [ { \"role\": \"user\", \"content\": \"who are you?\" } ], \"stream\": false }"
+    
+    curl -i -H "Accept: application/json" -X POST ${OLLAMA_URL}/chat -d "{\"model\": \"${MODEL_NAME}\", \"messages\": [ { \"role\": \"user\", \"content\": \"who is your creator?\" } ], \"stream\": false }"
     # disable debugging from here
     # set +x 
+}
+dockerimg() {
+    printf "\n ----------------------------------------------------------------  "
+    printf "\n       ------------ DOCKER IMAGE... OLLAMA ------------  "
+    printf "\n ----------------------------------------------------------------  \n"
+    # https://hub.docker.com/r/ollama/ollama/tags
+    docker pull ollama/ollama:latest
+    
+    docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama llama/ollama:latest
+}
+k8s-deploy() {
+    printf "\n ----------------------------------------------------------------  "
+    printf "\n       ------------ K8S DEPLOYMENT... OLLAMA ------------  "
+    printf "\n ----------------------------------------------------------------  \n"
+
+    kubectl apply -f ollama-k8s.yaml --validate='strict'
+
+    kubectl get deploy,svc,pods,cm -n ollama
+    #kubectl describe configmap/llama3 -n ollama
+
+    minikube dashboard &
+
 }
 
 # Check for 1 argument
@@ -82,6 +119,10 @@ if [[ -n $arg ]] ; then
         stop
     elif [[ "INFO" == "${arg}" ]] ; then   # Info 
         info
+    elif [[ "DOCKER" == "${arg}" ]] ; then # Status
+        dockerimg
+    elif [[ "K8S" == "${arg}" ]] ; then # Status
+        k8s-deploy
     fi
 fi
 

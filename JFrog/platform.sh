@@ -1,36 +1,47 @@
 #!/bin/bash
 arg=${1}
 DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
+# reference https://github.com/jfrog/charts/tree/master/stable/jfrog-platform
 
 export NAMESPACE="jfrog-platform"
 alias k=kubectl
 prestep() {
-    helm repo add jfrog https://charts.jfrog.io
+    helm repo add jfrog https://charts.jfrog.io && helm repo update && helm repo list
+    helm search repo jfrog-chart
 }
 platform-install() {
     printf "\n ----------------------------------------------------------------  "
     printf "\n ------------ INSTALLING... JFrog Platform on K8S ------------  "
     printf "\n ----------------------------------------------------------------  \n"
+    prestep
+
     export MASTER_KEY=$(openssl rand -hex 32) && echo "MASTER KEY: ${MASTER_KEY} \n"
 
     export JOIN_KEY=$(openssl rand -hex 32) && echo "Join KEY: ${JOIN_KEY} \n"
-
-    helm repo update
 
     kubectl create ns ${NAMESPACE} 
     # Create a secret containing the key. The key in the secret must be named master-key
     kubectl create secret generic my-masterkey-secret -n ${NAMESPACE} --from-literal=master-key=${MASTER_KEY}
     kubectl create secret generic my-joinkey-secret -n ${NAMESPACE} --from-literal=join-key=${JOIN_KEY}
 
+
     # Install the chart with the release name  artifactory and with master key and join key.
-    helm upgrade --install ${NAMESPACE} --set artifactory.replicaCount=1 --set artifactory.masterKey=${MASTER_KEY} --set artifactory.joinKey=${JOIN_KEY} --namespace ${NAMESPACE} jfrog-charts/jfrog-platform # --dry-run=client -o yaml > platform-custom-values.yml
+    # helm upgrade --install ${NAMESPACE} jfrog/jfrog-platform --namespace ${NAMESPACE} --create-namespace 
+
+    helm upgrade --install ${NAMESPACE} jfrog/jfrog-platform --set artifactory.metrics.enabled=true -f platform/platform-small.yaml --namespace ${NAMESPACE} --create-namespace
+
+    # helm upgrade --install ${NAMESPACE} --namespace ${NAMESPACE} jfrog/jfrog-platform --set artifactory.metrics.enabled=true --set artifactory.replicaCount=2 --set artifactory.masterKey=${MASTER_KEY} --set artifactory.joinKey=${JOIN_KEY} -f platform/platform-small.yaml -f platform/custom-values.yaml  
 
     # kubectl scale svc/artifactory -n artifactory --current-replicas=2 --replicas=1 
 
     sleep 60
+
+    kubectl get svc --namespace ${NAMESPACE} -w jfrog-platform-artifactory-nginx
+
     # expose postgres as NodePort
     # kubectl patch svc ${NAMESPACE}-postgresql -n ${NAMESPACE} -p '{"spec": {"type": "NodePort"}}'
     # port-forward: Listen on port 5432 on all addresses: localhost, 127.0.0.1, loca-ip
+    # kubectl port-forward --namespace ${NAMESPACE} svc/jfrog-platform--postgresql 5432:5432 &
     while true; do
         podStatus=$(kubectl get -n ${NAMESPACE} pods/${NAMESPACE}-postgresql-0  -o jsonpath='{.status.phase}')
         # change to uppercase
@@ -44,11 +55,28 @@ platform-install() {
             sleep 15
         fi
     done 
+   
 
     # expose artifactory as NodePort
-    kubectl patch svc ${NAMESPACE}-artifactory-nginx -n ${NAMESPACE} -p '{"spec": {"type": "NodePort"}}'
+    # kubectl get svc --namespace jfrog-platform -w jfrog-platform-artifactory-nginx
+    
+    # kubectl patch svc ${NAMESPACE}-artifactory-nginx -n ${NAMESPACE} -p '{"spec": {"type": "NodePort"}}'
+    while true; do
+        podStatus=$(kubectl get -n ${NAMESPACE} pods/${NAMESPACE}-artifactory-nginx  -o jsonpath='{.status.phase}')
+        # change to uppercase
+        podStatus=$(echo ${podStatus} | tr [a-z] [A-Z] | xargs) 
+        echo " Checking for Postgresql pod status: ${podStatus} "
+        # check for running status
+        if [[ "RUNNING" == "${podStatus}" ]] ; then
+            kubectl port-forward --address 0.0.0.0 --namespace ${NAMESPACE} svc/jfrog-platform-artifactory-nginx 8080:8080 &
+            break # exit loop
+        else
+            sleep 15
+        fi
+    done 
     sleep 5
-
+    
+    
     # Generate K8S YAML
     # helm template jfrog-charts/jfrog-platform --namespace ${NAMESPACE} --dry-run=client > ${NAMESPACE}-k8s.yml
 
@@ -59,7 +87,7 @@ platform-install() {
 }
 platform-serviceInfo(){
     printf "\n ----------------------------------------------------------------  "
-    printf "\n ----------------  JFrog Artifactory: K8S Info  ----------------  "
+    printf "\n ----------------  JFrog Platform: K8S Info  ----------------  "
     printf "\n ----------------------------------------------------------------  \n"
     kubectl port-forward --address 0.0.0.0 -n ${NAMESPACE} service/${NAMESPACE}-postgresql 5432:5432 &
     kubectl get pv && printf "\n" && kubectl get pvc,endpoints,pods,svc,rs,statefulset,deploy -n ${NAMESPACE} && printf "\n"
@@ -86,6 +114,14 @@ platform-delete(){
     helm uninstall ${NAMESPACE} && sleep 90 && kubectl delete pvc -l app=${NAMESPACE}
     kubectl delete ns ${NAMESPACE} --force=true --ignore-not-found=true
     printf "\n CLEANING: COMPLETE at $(date +"%Y-%m-%d %H:%M:%S") \n"
+}
+platform-dryrun(){
+    printf "\n ----------------------------------------------------------------  "
+    printf "\n ------------ DRY-RUN the JFrog Platform on K8S ------------  "
+    printf "\n ----------------------------------------------------------------  \n"
+    prestep
+     # Install the chart with the release name  artifactory and with master key and join key.
+    helm upgrade --install ${NAMESPACE} --set artifactory.metrics.enabled=true --set artifactory.replicaCount=2 --set artifactory.masterKey=${MASTER_KEY} --set artifactory.joinKey=${JOIN_KEY} --namespace ${NAMESPACE} jfrog-charts/jfrog-platform --dry-run=client -o yaml > platform/generated-template-values.yml
 }
 
 # Check for 1 argument
@@ -114,8 +150,12 @@ if [[ -n $arg ]] ; then
         platform-delete
     elif [[ "INFO" == "${arg}" ]] ; then   # Info 
         platform-serviceInfo
-    elif [[ "PRESTEP" == "${arg}" ]] ; then   # Info 
+    elif [[ "PRESTEP" == "${arg}" ]] ; then   # preset 
         prestep
+    elif [[ "DRYRUN" == "${arg}" ]] ; then   # dryrun 
+        platform-dryrun
+    else
+        echo "Error: Invalid argument. Use install | info | delete | prestep | dryrun"
     fi
 fi
 
