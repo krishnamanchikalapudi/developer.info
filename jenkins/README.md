@@ -1,9 +1,14 @@
-### Start Container
+### Start Jenkins service
 `````
-./run.sh
+./jenkins.sh start
 `````
 
-### Stop Containers
+### Stop Jenkins service
 `````
-./stop.sh
+./jenkins.sh stop
+`````
+
+### Upgrade Jenkins war
+`````
+./jenkins.sh update
 `````
