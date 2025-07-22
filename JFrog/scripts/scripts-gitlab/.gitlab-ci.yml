@@ -1,0 +1,54 @@
+stages:
+  - build_with_oidc_token
+
+default:
+  image: maven:3-amazoncorretto-17-debian  # https://hub.docker.com/_/maven/
+
+include: # files at https://releases.jfrog.io/artifactory/jfrog-cli/gitlab/v2/ 
+  - remote: "https://releases.jfrog.io/artifactory/jfrog-cli/gitlab/v2/.setup-jfrog-unix.yml"
+#     # refer Artifactory setup screenshot: https://github.com/krishnamanchikalapudi/spring-petclinic/tree/main/my-files/images/integrations/oidc-gitlab.png
+#     # For Windows agents:
+#     #- remote: "https://releases.jfrog.io/artifactory/jfrog-cli/gitlab/v2/.setup-jfrog-windows.yml"
+
+build:
+  stage: build_with_oidc_token
+  variables:
+    BUILD_NAME: "spring-petclinic"
+    BUILD_ID: "gl-${CI_PIPELINE_ID}"
+    RT_REPO_MVN_VIRTUAL: "krishnam-mvn-virtual"
+    JF_URL: "https://psazuse.jfrog.io"
+    JF_CLI_RELEASES_REPO: "https://psazuse.jfrog.io/artifactory/krishnam-mvn-virtual"
+    JFROG_CLI_LOG_LEVEL: "DEBUG"
+  id_tokens:
+    FIRST_ID_TOKEN:
+      aud: https://gitlab.com
+  script:
+    - apt-get -y update 
+    - apt-get install -y jq
+    - apt-get install -y curl
+    - apt-get install -y git wget gpg
+    - |
+      ACCESS_TOKEN=$(curl -XPOST "${JF_URL}/access/api/v1/oidc/token" -H "Content-Type: application/json" -d "{\"grant_type\": \"urn:ietf:params:oauth:grant-type:token-exchange\", \"subject_token_type\":\"urn:ietf:params:oauth:token-type:id_token\", \"subject_token\": \"$FIRST_ID_TOKEN\", \"provider_name\": \"gitlab-krishnamanchikalapudi\"}")
+      echo ${ACCESS_TOKEN}
+      ACCESS_TOKEN=$(echo $ACCESS_TOKEN | jq -r '.access_token')
+      export JF_ACCESS_TOKEN=${ACCESS_TOKEN}
+    # JFrog config show
+    - !reference [.setup_jfrog, script] # install JF-CLI v2
+    - echo "JF_URL=${JF_URL}"
+    - java -version
+    - mvn -version
+    - jf --version
+    - echo "JF_CLI_RELEASES_REPO= ${JF_CLI_RELEASES_REPO}"
+    - export JFROG_CLI_RELEASES_REPO="${JF_CLI_RELEASES_REPO}"
+    - export JFROG_CLI_EXTRACTORS_REMOTE="${JF_CLI_RELEASES_REPO}"
+    - export JFROG_CLI_LOG_LEVEL=${JFROG_CLI_LOG_LEVEL}
+    - jf c add --url=${JF_URL} --overwrite=true --access-token=${JF_ACCESS_TOKEN}
+    - jf c show
+    - jf rt ping 
+    - echo "repo= $RT_REPO_MVN_VIRTUAL"
+    - echo "Build_name= $BUILD_NAME"
+    - echo "Build_id= $BUILD_ID"
+    # MVN package
+    - jf mvnc --global --repo-resolve-releases ${RT_REPO_MVN_VIRTUAL} --repo-resolve-snapshots ${RT_REPO_MVN_VIRTUAL}
+    
+

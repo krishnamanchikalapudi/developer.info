@@ -1,0 +1,132 @@
+node {
+    JFROG_NAME="psazuse"
+    JF_RT_HOST="${JFROG_NAME}.jfrog.io"
+    JF_RT_URL="https://${JF_RT_HOST}"
+    
+    // https://github.com/krishnamanchikalapudi/spring-petclinic
+    // https://docs.jfrog-applications.jfrog.io/jfrog-applications/jfrog-cli
+    JKS_BUILD_NAME="spring-petclinic" 
+    JKS_BUILD_ID="jks.mvn.rbv2.${env.BUILD_ID}"
+    RT_REPO_MVN_VIRTUAL="krishnam-mvn-virtual"
+    SPEC_FILE_RBv2="${WORKSPACE}/SPEC-RBv2-${env.BUILD_ID}.json"
+
+    JF_CLI_LOG_LEVEL='DEBUG'
+    JFROG_CLI_OUTPUT_DIR="${WORKSPACE}/cli/"
+    def BUILD_TS = sh(script: "date +%Y-%m-%d-%H-%M", returnStdout: true).trim()
+
+    stage('PACKAGE') { 
+        stage('init') {
+            stage('jf.ver') {
+                sh """ #!/bin/bash
+                    jf -v
+                    java -version
+                    mvn -v
+                """ 
+            } // stage: jf.ver
+            stage('jf.vars') {
+                sh """ #!/bin/bash
+                    export JF_CLI_LOG_LEVEL="${JF_CLI_LOG_LEVEL}"
+                    export JFROG_CLI_COMMAND_SUMMARY_OUTPUT_DIR="${JFROG_CLI_OUTPUT_DIR}"
+                """ 
+            } // stage: jf.ver
+            stage('rt.config') {
+                // jenkins secrets: https://www.jenkins.io/doc/book/using/using-credentials/
+                // JFrog CLI config
+                withCredentials([usernamePassword(credentialsId: 'JFROG_ARTIFACTORY_CLI', passwordVariable: 'JFROG_RT_PWD', usernameVariable: 'JFROG_RT_USER')]) {
+                    sh """ #!/bin/bash
+                        jf config add ${JFROG_NAME} --artifactory-url=${JF_RT_URL}/artifactory --xray-url=${JF_RT_URL}/xray --user=${JFROG_RT_USER} --password=${JFROG_RT_PWD} --interactive=false --overwrite    
+                    """
+                } // withCredentials: JFROG_ARTIFACTORY
+            } // stage: rt.config
+            stage('rt.ping') {
+                sh """ #!/bin/bash
+                    jf rt ping
+                """
+            } // stage: rt.ping
+            stage('config.show') {
+                sh """ #!/bin/bash
+                    echo "\n"
+                    jf config show
+                """
+            } // stage: config.show
+        } // stage: init
+        stage('clone') {
+            git branch: 'main', url: 'https://github.com/krishnamanchikalapudi/spring-petclinic.git'
+        } // stage: clone
+        stage('MAVEN') {
+            stage('mvn config') {
+                sh """ #!/bin/bash  
+                    jf mvnc --global --repo-resolve-releases ${RT_REPO_MVN_VIRTUAL} --repo-resolve-snapshots ${RT_REPO_MVN_VIRTUAL} 
+                """
+            } // stage: mvnc
+            stage('build') {
+                sh """ #!/bin/bash
+                   jf mvn clean install -DskipTests=true --build-name=${JKS_BUILD_NAME} --build-number=${JKS_BUILD_ID} --detailed-summary=true  
+                """
+            } // stage: build
+        } // stage: MAVEN
+    } // stage: package
+    stage('BUILD INFO') {
+        stage('collect env') {
+            sh """ #!/bin/bash
+                jf rt bce ${JKS_BUILD_NAME} ${JKS_BUILD_ID} 
+            """
+        } // stage: collect env
+        stage('vcs info') {
+            sh """ #!/bin/bash
+                jf rt bag ${JKS_BUILD_NAME} ${JKS_BUILD_ID} 
+            """
+        } // stage: vcs info
+        stage('build:publish') {
+            sh """ #!/bin/bash
+                jf rt bp ${JKS_BUILD_NAME} ${JKS_BUILD_ID} --detailed-summary=true
+            """
+        } // stage: build publish
+    } // stage: BUILD INFO
+    stage('RELEASE BUNDLE v2') {
+        // https://docs.jfrog-applications.jfrog.io/jfrog-applications/jfrog-cli/cli-for-jfrog-artifactory/release-lifecycle-management
+        stage('spec') {
+            // { "files": [ {"build": "spring-petclinic-rbv2/cmd.2024-08-30-17-01", "includeDeps": "false" } ] }
+            script {
+                def rb2info=  [
+                'build' : "${JKS_BUILD_NAME}/${JKS_BUILD_ID}",
+                'includeDeps' : "false"
+                ]
+                def json = new groovy.json.JsonBuilder()
+                json "files": [ rb2info ]
+                def file = new File("${SPEC_FILE_RBv2}")
+                file.write(groovy.json.JsonOutput.prettyPrint(json.toString()))
+            }
+            sh """ #!/bin/bash
+                cat ${SPEC_FILE_RBv2}
+            """
+        } // stage: spec
+         stage('RBv2:NEW') {
+            withCredentials([string(credentialsId: 'JF_ACCESS_TOKEN', variable: 'JF_ACCESS_TOKEN')]) {
+                sh """ #!/bin/bash
+                    jf rbc ${JKS_BUILD_NAME} ${JKS_BUILD_ID} --sync="true" --url="${JF_RT_URL}" --access-token="${JF_ACCESS_TOKEN}" --signing-key="krishnam" --spec="${SPEC_FILE_RBv2}"
+                """
+            } // withCredentials: JF_ACCESS_TOKEN
+        } // stage: RBv2:NEW
+        stage('RBv2:DEV') {
+            withCredentials([string(credentialsId: 'JF_ACCESS_TOKEN', variable: 'JF_ACCESS_TOKEN')]) {
+                sh """ #!/bin/bash
+                jf rbp ${JKS_BUILD_NAME} ${JKS_BUILD_ID} DEV --sync="true" --signing-key="krishnam" --url="${JF_RT_URL}" --access-token="${JF_ACCESS_TOKEN}"
+            """
+            } // withCredentials: JF_ACCESS_TOKEN
+        } // stage: RBv2:DEV
+        stage('RBv2:QA') {
+            withCredentials([string(credentialsId: 'JF_ACCESS_TOKEN', variable: 'JF_ACCESS_TOKEN')]) {
+                sh """ #!/bin/bash
+                jf rbp ${JKS_BUILD_NAME} ${JKS_BUILD_ID} QA --sync="true" --signing-key="krishnam" --url="${JF_RT_URL}" --access-token="${JF_ACCESS_TOKEN}"
+            """
+            } // withCredentials: JF_ACCESS_TOKEN
+        } // stage: RBv2:QA
+    } // stage: RELEASE BUNDLE v2
+    
+    stage('cleanup') {
+        sh """ #!/bin/bash
+            rm -rf $SPEC_FILE_RBv2
+        """
+    } // stage: cleanup
+} // node

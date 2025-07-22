@@ -1,0 +1,139 @@
+node {
+    JFROG_NAME="psazuse"
+    JF_RT_HOST="${JFROG_NAME}.jfrog.io"
+    JF_RT_URL="https://${JF_RT_HOST}"
+    
+    // https://github.com/krishnamanchikalapudi/spring-petclinic
+    // https://docs.jfrog-applications.jfrog.io/jfrog-applications/jfrog-cli
+    JKS_BUILD_NAME="spring-petclinic" 
+    JKS_BUILD_ID="jks.mvn.dkr.${env.BUILD_ID}"
+
+    RT_REPO_MVN_VIRTUAL="krishnam-mvn-virtual"
+    RT_REPO_DOCKER_VIRTUAL="krishnam-docker-virtual"
+
+    JF_CLI_LOG_LEVEL='DEBUG' 
+    JFROG_CLI_OUTPUT_DIR="${WORKSPACE}/cli/"
+
+    SPEC_MANIFEST_DOCKER="${WORKSPACE}/list.manifest-${env.BUILD_ID}.json"
+    SPEC_BP_DOCKER="${WORKSPACE}/dockerimage-file-details-${env.BUILD_ID}"
+
+    def BUILD_TS = sh(script: "date +%Y-%m-%d-%H-%M", returnStdout: true).trim()
+
+    stage('PACKAGE') { 
+        stage('init') {
+            stage('jf.ver') {
+                sh """ #!/bin/bash
+                    jf -v
+                    java -version
+                    mvn -v
+                    docker -v
+                """ 
+            } // stage: jf.ver
+            stage('jf.vars') {
+                sh """ #!/bin/bash
+                    export JFROG_CLI_COMMAND_SUMMARY_OUTPUT_DIR="${JFROG_CLI_OUTPUT_DIR}"
+                    export JFROG_CLI_LOG_LEVEL="${JF_CLI_LOG_LEVEL}"
+                """ 
+            } // stage: jf.ver
+            stage('rt.config') {
+                // jenkins secrets: https://www.jenkins.io/doc/book/using/using-credentials/
+                // JFrog CLI config
+                withCredentials([usernamePassword(credentialsId: 'JFROG_ARTIFACTORY_CLI', passwordVariable: 'JFROG_RT_PWD', usernameVariable: 'JFROG_RT_USER')]) {
+                    sh """ #!/bin/bash
+                        jf config add ${JFROG_NAME} --artifactory-url=${JF_RT_URL}/artifactory --xray-url=${JF_RT_URL}/xray --user=${JFROG_RT_USER} --password=${JFROG_RT_PWD} --interactive=false --overwrite    
+                    """
+                } // withCredentials: JFROG_ARTIFACTORY
+            } // stage: rt.config
+            stage('rt.ping') {
+                sh """ #!/bin/bash
+                    jf rt ping
+                """
+            } // stage: rt.ping
+            stage('config.show') {
+                sh """ #!/bin/bash
+                    jf config show
+                """
+            } // stage: config.show
+        } // stage: init
+        stage('clone') {
+            git branch: 'main', url: 'https://github.com/krishnamanchikalapudi/spring-petclinic.git'
+        } // stage: clone
+        stage('MAVEN') {
+            stage('mvn config') {
+                sh """ #!/bin/bash  
+                    jf mvnc --global --repo-resolve-releases ${RT_REPO_MVN_VIRTUAL} --repo-resolve-snapshots ${RT_REPO_MVN_VIRTUAL} 
+                """
+            } // stage: mvnc
+            stage('build') {
+                sh """ #!/bin/bash
+                    jf mvn clean install -DskipTests=true --build-name=${JKS_BUILD_NAME} --build-number=${JKS_BUILD_ID} --detailed-summary=true 
+                """
+            } // stage: build
+        } // stage: MAVEN
+        stage('Docker') {
+            stage('config') {
+                withCredentials([usernamePassword(credentialsId: 'JFROG_ARTIFACTORY_CLI', passwordVariable: 'JFROG_RT_PWD', usernameVariable: 'JFROG_RT_USER')]) {
+                    sh """ #!/bin/bash
+                        docker login ${JF_RT_HOST} -u ${JFROG_RT_USER} -p ${JFROG_RT_PWD}
+                    """
+                } // withCredentials
+            } // stage: config
+            stage('image') {
+                sh """ #!/bin/bash
+                    docker image build -f ../Dockerfile-cli --platform "linux/amd64,linux/arm64" -t ${JF_RT_HOST}/${RT_REPO_DOCKER_VIRTUAL}/${JKS_BUILD_NAME}:${JKS_BUILD_ID} --output=type=image .
+                """
+            } // stage: image
+            stage('push') {
+                sh """ #!/bin/bash
+                    jf docker push ${JF_RT_HOST}/${RT_REPO_DOCKER_VIRTUAL}/${JKS_BUILD_NAME}:${JKS_BUILD_ID} --build-name=${JKS_BUILD_NAME} --build-number=${JKS_BUILD_ID} --detailed-summary=true
+                """
+            } // stage: push 
+        } // stage: docker
+    } // stage: package
+    stage('BUILD INFO') {
+        stage('collect env') {
+            sh """ #!/bin/bash
+                jf rt bce ${JKS_BUILD_NAME} ${JKS_BUILD_ID} 
+            """
+        } // stage: collect env
+        stage('vcs info') {
+            sh """ #!/bin/bash
+                jf rt bag ${JKS_BUILD_NAME} ${JKS_BUILD_ID} 
+            """
+        } // stage: vcs info
+        stage('build:create') { 
+            withCredentials([string(credentialsId: 'JF_ACCESS_TOKEN', variable: 'JF_ACCESS_TOKEN')]) {
+                sh """ #!/bin/bash
+                    jf rt curl -XGET "/api/storage/${RT_REPO_DOCKER_VIRTUAL}/${JKS_BUILD_NAME}/${JKS_BUILD_ID}/list.manifest.json" -H "Authorization: Bearer ${JF_ACCESS_TOKEN}" -o "${SPEC_MANIFEST_DOCKER}"
+                """
+            } // withCredentials
+            imageSha256=sh(returnStdout: true, script: "cat ${SPEC_MANIFEST_DOCKER} | jq -r '.originalChecksums.sha256'").trim()
+            sh """
+                echo ${imageSha256}
+
+                echo ${JF_RT_HOST}/${RT_REPO_DOCKER_VIRTUAL}/${JKS_BUILD_NAME}:${JKS_BUILD_ID}@sha256:${imageSha256} > ${SPEC_BP_DOCKER}
+
+                cat ${SPEC_BP_DOCKER}
+
+                jf rt bdc ${RT_REPO_DOCKER_VIRTUAL} --image-file ${SPEC_BP_DOCKER} --build-name ${JKS_BUILD_NAME} --build-number ${JKS_BUILD_ID} 
+            """
+
+        } // stage: build create
+        stage('build:publish') {
+            sh """ #!/bin/bash
+                jf rt bp ${JKS_BUILD_NAME} ${JKS_BUILD_ID} --detailed-summary=true
+            """
+        } // stage: build publish
+    } // stage: BUILD INFO
+    
+    
+    stage('cleanup') {
+        sh """ #!/bin/bash
+            rm -rf $SPEC_MANIFEST_DOCKER
+            rm -rf $SPEC_BP_DOCKER
+
+            docker image prune -a --force --filter "until=24h"
+            docker system prune -a --force --filter "until=24h"
+        """
+    } // stage: cleanup
+} // node
