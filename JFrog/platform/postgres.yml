@@ -844,7 +844,7 @@ spec:
       labels:
         app: postgresql
         role: primary
-        version: 18.x
+        version: 16.x
     spec:
       volumes:
         - name: postgres-primary-data

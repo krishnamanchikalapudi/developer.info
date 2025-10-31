@@ -4,35 +4,10 @@ DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 # reference https://github.com/jfrog/charts/tree/master/stable/jfrog-platform
 
 export JFROG_NAMESPACE="jfrog-platform"
-export POSTGRES_NAMESPACE="postgresql"
 alias k=kubectl
 prestep() {
     helm repo add jfrog https://charts.jfrog.io && helm repo update && helm repo list
     helm search repo jfrog-chart
-
-    helm version
-}
-postgres-install() {
-    printf "\n ----------------------------------------------------------------  "
-    printf "\n ------------ INSTALLING... Postgres on K8S ------------  "
-    printf "\n ----------------------------------------------------------------  \n"
-    kubectl create ns ${POSTGRES_NAMESPACE} 
-    kubectl apply -f platform/postgres.yml -n ${POSTGRES_NAMESPACE} --validate=true 
-
-    kubectl port-forward --address 0.0.0.0 -n ${POSTGRES_NAMESPACE} svc/svc-primary 5432:5432 &
-    sleep 3
-
-    printf "\n" && kubectl get pvc,endpoints,pods,svc,rs,statefulset,deploy -n ${POSTGRES_NAMESPACE} && printf "\n"
-    printf "kubectl exec -it svc/svc-primary -n ${POSTGRES_NAMESPACE} -- psql -d mydatabase -U myuser \n"
-    
-    printf "DB Defaults; DB: ${DB_URL}  username: ${DB_USER}    password: ${DB_PWD} \n\n"
-    export NODE_PORT_HTTP=$(kubectl get svc/svc-primary -n ${POSTGRES_NAMESPACE} -o jsonpath='{.spec.ports[0].nodePort}') 
-    export DB_USER=$(kubectl get secrets ps-secrets -n ${POSTGRES_NAMESPACE} -o jsonpath='{.data.PS_USER}' | base64 --decode)
-    export DB_PASSWORD=$(kubectl get secrets ps-secrets -n ${POSTGRES_NAMESPACE} -o jsonpath='{.data.PS_PASSWORD}' | base64 --decode)
-    export DB_NAME=$(kubectl get secrets ps-secrets -n ${POSTGRES_NAMESPACE} -o jsonpath='{.data.PS_DB}' | base64 --decode)
-
-    printf "\n\nJDBC URI: jdbc:postgresql://localhost:5432/${DB_NAME}  \n"
-    printf "\n\n   USER: ${DB_USER}    PASSWORD: ${DB_PASSWORD}  \n"
 }
 platform-install() {
     printf "\n ----------------------------------------------------------------  "
@@ -54,7 +29,8 @@ platform-install() {
 
     # helm upgrade --install jfrog-platform --namespace jfrog-platform --create-namespace jfrog/jfrog-platform  -f custom-values.yaml
 
-    helm upgrade --install ${JFROG_NAMESPACE} jfrog/${JFROG_NAMESPACE} --namespace ${JFROG_NAMESPACE} --create-namespace ./platform/custom-values.yaml  
+    # helm upgrade --install jfrog-platform --namespace jfrog-platform --create-namespace jfrog/jfrog-platform  -f custom-values.yaml
+     helm upgrade --install ${JFROG_NAMESPACE} --namespace ${JFROG_NAMESPACE} --create-namespace jfrog/${JFROG_NAMESPACE} -f ./platform/custom-values.yaml 
 
     # helm upgrade --install ${JFROG_NAMESPACE} --namespace ${JFROG_NAMESPACE} jfrog/jfrog-platform --set artifactory.metrics.enabled=true --set artifactory.replicaCount=2 --set artifactory.masterKey=${MASTER_KEY} --set artifactory.joinKey=${JOIN_KEY} -f platform/platform-small.yaml -f platform/custom-values.yaml  
 
@@ -63,25 +39,7 @@ platform-install() {
     sleep 60
 
     kubectl get svc --namespace ${JFROG_NAMESPACE} -w jfrog-platform-artifactory-nginx
-
-    # expose postgres as NodePort
-    # kubectl patch svc ${JFROG_NAMESPACE}-postgresql -n ${JFROG_NAMESPACE} -p '{"spec": {"type": "NodePort"}}'
-    # port-forward: Listen on port 5432 on all addresses: localhost, 127.0.0.1, loca-ip
-    # kubectl port-forward --namespace ${JFROG_NAMESPACE} svc/jfrog-platform--postgresql 5432:5432 &
-    while true; do
-        podStatus=$(kubectl get -n ${JFROG_NAMESPACE} pods/${JFROG_NAMESPACE}-postgresql-0  -o jsonpath='{.status.phase}')
-        # change to uppercase
-        podStatus=$(echo ${podStatus} | tr [a-z] [A-Z] | xargs) 
-        echo " Checking for Postgresql pod status: ${podStatus} "
-        # check for running status
-        if [[ "RUNNING" == "${podStatus}" ]] ; then
-            kubectl port-forward --address 0.0.0.0 -n ${JFROG_NAMESPACE} service/${JFROG_NAMESPACE}-postgresql 5432:5432 &
-            break # exit loop
-        else
-            sleep 15
-        fi
-    done 
-   
+ 
 
     # expose artifactory as NodePort
     # kubectl get svc --namespace jfrog-platform -w jfrog-platform-artifactory-nginx
@@ -91,7 +49,7 @@ platform-install() {
         podStatus=$(kubectl get -n ${JFROG_NAMESPACE} pods/${JFROG_NAMESPACE}-artifactory-nginx  -o jsonpath='{.status.phase}')
         # change to uppercase
         podStatus=$(echo ${podStatus} | tr [a-z] [A-Z] | xargs) 
-        echo " Checking for Postgresql pod status: ${podStatus} "
+        echo " Checking for pod status: ${podStatus} "
         # check for running status
         if [[ "RUNNING" == "${podStatus}" ]] ; then
             kubectl port-forward --address 0.0.0.0 --namespace ${JFROG_NAMESPACE} svc/jfrog-platform-artifactory-nginx 8080:8080 &
@@ -115,18 +73,9 @@ platform-serviceInfo(){
     printf "\n ----------------------------------------------------------------  "
     printf "\n ----------------  JFrog Platform: K8S Info  ----------------  "
     printf "\n ----------------------------------------------------------------  \n"
-    kubectl port-forward --address 0.0.0.0 -n ${JFROG_NAMESPACE} service/${JFROG_NAMESPACE}-postgresql 5432:5432 &
     kubectl get pv && printf "\n" && kubectl get pvc,endpoints,pods,svc,rs,statefulset,deploy -n ${JFROG_NAMESPACE} && printf "\n"
-
-    #export DB_NODE_PORT=$(kubectl get svc ${JFROG_NAMESPACE}-postgresql -n ${JFROG_NAMESPACE} -o jsonpath='{.spec.ports[0].nodePort}') 
-    # jdbc:oracle:thin:[<user>/<password>]@<host>[:<port>]:<SID>    jdbc:postgresql://host:port/database
-    export DB_PWD=$(kubectl get secrets ${JFROG_NAMESPACE}-artifactory-unified-secret -n ${JFROG_NAMESPACE} -o jsonpath='{.data.db-password}' | base64 --decode)
-    export DB_URL=$(kubectl get secrets ${JFROG_NAMESPACE}-artifactory-unified-secret -n ${JFROG_NAMESPACE} -o jsonpath='{.data.db-url}' | base64 --decode)
-    export DB_USER=$(kubectl get secrets ${JFROG_NAMESPACE}-artifactory-unified-secret -n ${JFROG_NAMESPACE} -o jsonpath='{.data.db-user}' | base64 --decode)
-    printf "\n\nDatabase Port: ${NODE_PORT_HTTP}   JDBC DB URI: jdbc:postgresql://localhost:5432/artifactory   \n"
-    printf "kubectl exec -it svc/${JFROG_NAMESPACE}-postgresql  -n ${JFROG_NAMESPACE} -- psql -d artifactory -U ${DB_USER} \n"
-    printf "DB Defaults; DB: ${DB_URL}  username: ${DB_USER}    password: ${DB_PWD} \n\n"
     
+
     export NODE_PORT_HTTP=$(kubectl get svc -n ${JFROG_NAMESPACE} ${JFROG_NAMESPACE}-artifactory-nginx -o jsonpath='{.spec.ports[0].nodePort}') 
     export NODE_PORT_HTTPS=$(kubectl get svc -n ${JFROG_NAMESPACE} ${JFROG_NAMESPACE}-artifactory-nginx -o jsonpath='{.spec.ports[1].nodePort}') 
     printf "\n\nHTTP Port: ${NODE_PORT_HTTP}      Browser URI: http://localhost:${NODE_PORT_HTTP}\n"
@@ -137,8 +86,9 @@ platform-delete(){
     printf "\n ----------------------------------------------------------------  "
     printf "\n ------------ CLEANING the JFrog Platform on K8S ------------  "
     printf "\n ----------------------------------------------------------------  \n"
-    helm uninstall ${JFROG_NAMESPACE} && sleep 90 && kubectl delete pvc -l app=${JFROG_NAMESPACE}
+    helm uninstall ${JFROG_NAMESPACE} --ignore-not-found && sleep 90 && kubectl delete pvc -l app=${JFROG_NAMESPACE}
     kubectl delete ns ${JFROG_NAMESPACE} --force=true --ignore-not-found=true
+    kubectl get pv, pvc -n ${JFROG_NAMESPACE}
     printf "\n CLEANING: COMPLETE at $(date +"%Y-%m-%d %H:%M:%S") \n"
 }
 platform-dryrun(){
@@ -147,16 +97,13 @@ platform-dryrun(){
     printf "\n ----------------------------------------------------------------  \n"
     prestep
      # Install the chart with the release name  artifactory and with master key and join key.
-    export MASTER_KEY=$(openssl rand -hex 32) && echo "MASTER KEY: ${MASTER_KEY} \n"
-    export JOIN_KEY=$(openssl rand -hex 32) && echo "Join KEY: ${JOIN_KEY} \n"
-
     helm upgrade --install ${JFROG_NAMESPACE} --set artifactory.metrics.enabled=true --set artifactory.replicaCount=2 --set artifactory.masterKey=${MASTER_KEY} --set artifactory.joinKey=${JOIN_KEY} --namespace ${JFROG_NAMESPACE} jfrog-charts/jfrog-platform --dry-run=client -o yaml > platform/generated-template-values.yml
 }
 
 # Check for 1 argument
 if [ $# -ne 1 ]; then
   echo "Error: This script requires exactly 1 arguments."
-  echo "    ./platform.sh <install | info | delete> "
+  echo "    ./platform-ext-db.sh <install | info | delete> "
 fi
 # -z option with $1, if the first argument is NULL. Set to default
 if  [[ -z "$1" ]] ; then # check for null
@@ -183,8 +130,6 @@ if [[ -n $arg ]] ; then
         prestep
     elif [[ "DRYRUN" == "${arg}" ]] ; then   # dryrun 
         platform-dryrun
-    elif [[ "PGINSTALL" == "${arg}" ]] || [[ "POSTGRES" == "${arg}" ]] ; then   # Info 
-        postgres-install
     else
         echo "Error: Invalid argument. Use install | info | delete | prestep | dryrun"
     fi

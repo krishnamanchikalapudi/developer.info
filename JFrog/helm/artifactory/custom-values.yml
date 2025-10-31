@@ -1,0 +1,54 @@
+# JFrog Platform Helm Chart Configuration
+# Using external PostgreSQL database
+
+global:
+  # Reference to secrets created by the script
+  # These will be overridden by --set flags in the install script
+  masterKeySecretName: my-masterkey-secret
+  joinKeySecretName: my-joinkey-secret
+
+artifactory:
+  enabled: true
+  splitServicesToContainers: true
+  # Router service configuration for NodePort access
+  # Router handles incoming traffic in JFrog Platform with splitServicesToContainers
+  router:
+    service:
+      type: NodePort
+  artifactory:
+    replicaCount: 2
+    # External database configuration
+    database:
+      type: postgresql
+      driver: org.postgresql.Driver
+      url: jdbc:postgresql://localhost:5432/artifactory?sslmode=
+      user: artifactory
+      password: myRtPa$sw0rd
+      maxOpenConnections: 50
+    # Skip waiting for external database
+    extraEnvironmentVariables:
+      - name: SKIP_WAIT_FOR_EXTERNAL_DB
+        value: "true"
+
+xray:
+  enabled: false
+
+distribution:
+  enabled: false
+
+insight:
+  enabled: false
+
+pipelines:
+  enabled: false
+
+worker:
+  enabled: false
+
+catalog:
+  enabled: false
+
+# Artifactory Admin credentials
+artifactoryAdmin:
+  username: admin
+  password: Password@123
