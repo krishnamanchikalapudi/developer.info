@@ -1,5 +1,5 @@
 # JFrog Platform Helm Chart Configuration
-# Using external PostgreSQL database
+# Configured for minikube with NodePort service type
 
 global:
   # Reference to secrets created by the script
@@ -10,25 +10,82 @@ global:
 artifactory:
   enabled: true
   splitServicesToContainers: true
-  # Router service configuration for NodePort access
+  # Router service configuration for NodePort access on minikube
   # Router handles incoming traffic in JFrog Platform with splitServicesToContainers
   router:
+    enabled: true
     service:
       type: NodePort
+      # Enable HTTP and HTTPS ports
+      # Router uses port 8082 for HTTP traffic
+      ports:
+        - name: http
+          port: 80
+          targetPort: 8082
+          protocol: TCP
+        - name: https
+          port: 443
+          targetPort: 8082
+          protocol: TCP
+    # Add readiness and liveness probes for router
+    # Router listens on port 8082 and handles traffic routing
+    # Using TCP probe since router may not have a reliable HTTP health endpoint initially
+    readinessProbe:
+      tcpSocket:
+        port: 8082
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+    livenessProbe:
+      tcpSocket:
+        port: 8082
+      initialDelaySeconds: 120
+      periodSeconds: 30
+      timeoutSeconds: 10
+      failureThreshold: 3
   artifactory:
-    replicaCount: 2
-    # External database configuration
-    database:
-      type: postgresql
-      driver: org.postgresql.Driver
-      url: jdbc:postgresql://localhost:5432/artifactory?sslmode=
-      user: artifactory
-      password: myRtPa$sw0rd
-      maxOpenConnections: 50
-    # Skip waiting for external database
+    replicaCount: 1
+    # Internal database configuration (PostgreSQL deployed with platform)
+    # Database will be deployed as part of the platform
+    persistence:
+      enabled: true
+      size: 50Gi
+    # Artifactory service port configuration - Artifactory listens on port 8090
+    service:
+      # Internal service port
+      httpPort: 8090
+    # Container ports configuration
+    containerPorts:
+      httpPort: 8090
+    # Set Artifactory to listen on port 8090 via environment variable
     extraEnvironmentVariables:
       - name: SKIP_WAIT_FOR_EXTERNAL_DB
-        value: "true"
+        value: "false"
+      - name: ARTIFACTORY_PORT
+        value: "8090"
+      - name: ARTIFACTORY_TOMCAT_PORT
+        value: "8090"
+    # Add readiness probe for artifactory
+    # Use more lenient settings to ensure Artifactory is ready before marking it as available
+    readinessProbe:
+      httpGet:
+        path: /artifactory/api/system/ping
+        port: 8090
+      initialDelaySeconds: 120
+      periodSeconds: 15
+      timeoutSeconds: 10
+      failureThreshold: 10
+      successThreshold: 1
+    livenessProbe:
+      httpGet:
+        path: /artifactory/api/system/ping
+        port: 8090
+      initialDelaySeconds: 240
+      periodSeconds: 30
+      timeoutSeconds: 15
+      failureThreshold: 5
 
 xray:
   enabled: false
@@ -52,3 +109,10 @@ catalog:
 artifactoryAdmin:
   username: admin
   password: Password@123
+
+# PostgreSQL database (internal, deployed with platform)
+postgresql:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 20Gi

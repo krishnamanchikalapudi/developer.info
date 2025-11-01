@@ -4,6 +4,8 @@ DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 # https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands
 alias k=kubectl
 export CPU="6" MEMORY="18432"  # 18GB x 1024 = 18432
+alias kubectl="minikube kubectl --"
+
 
 minikube-install(){
     printf "\n ----------------------------------------------------------------  "
@@ -45,9 +47,15 @@ minikube-start(){
         printf "\nMinikube is not running. Starting Minikube...\n"
         kubectl delete pv ---cascade=orphan --force --ignore-not-found=true &
         # Start Minikube with specified resources  --driver='docker'
-        minikube start --cpus=${CPU} --memory=${MEMORY} --container-runtime=containerd &
+        # minikube start --driver=qemu --cpus=6 --memory=18432 &
+        minikube start --driver=qemu --cpus=${CPU} --memory=${MEMORY} &
         # --addons=[ingress,ingress-dns,dashboard,metrics-server] 
-        sleep 30
+        sleep 40
+        minikube dashboard --url --port=8001 &
+        sleep 10
+        open "http://127.0.0.1:8001/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:/proxy/#/workloads?namespace=default"
+
+
         # minikube addons list
         # minikube addons enable ingress --refresh --force &
         # minikube tunnel --cleanup &
@@ -81,7 +89,7 @@ minikube-stop(){
         printf "\nStopping Minikube...\n"
         # kubectl delete pv,pvc --all --force --ignore-not-found=true
         # kubectl delete pv --all --force --ignore-not-found=true
-        minikube stop 
+        minikube stop --all
         printf "\nMinikube stopped.\n"
     else
         printf "\nMinikube is not running.\n"
