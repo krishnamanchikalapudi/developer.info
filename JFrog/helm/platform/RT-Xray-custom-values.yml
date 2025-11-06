@@ -1,0 +1,23 @@
+global:
+  database:
+    initDBCreation: true
+postgresql:
+  enabled: true
+artifactory:
+  enabled: true
+  splitServicesToContainers: true
+xray:
+  enabled: true
+# If enabling Xray, rabbitmq should also be enabled
+rabbitmq:
+  enabled: true
+distribution:
+  enabled: false
+insight:
+  enabled: false
+pipelines:
+  enabled: false
+worker:
+  enabled: false
+catalog:
+  enabled: false

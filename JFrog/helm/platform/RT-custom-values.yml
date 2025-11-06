@@ -1,0 +1,29 @@
+global:
+  database:
+    initDBCreation: true
+postgresql:
+  enabled: true
+artifactory:
+  enabled: true
+  artifactory:
+    ## NOTE: For HA deployments, set replicaCount > 1 (recommended 3) and add env var JF_SHARED_NODE_HAENABLED=true
+    replicaCount: 2
+    extraEnvironmentVariables:
+    - name : JF_SHARED_NODE_HAENABLED
+      value: "true"
+    splitServicesToContainers: true
+xray:
+  enabled: false
+# If enabling Xray, rabbitmq should also be enabled
+rabbitmq:
+  enabled: false
+distribution:
+  enabled: false
+insight:
+  enabled: false
+pipelines:
+  enabled: false
+worker:
+  enabled: false
+catalog:
+  enabled: false
