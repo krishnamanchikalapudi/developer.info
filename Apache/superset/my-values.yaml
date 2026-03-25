@@ -1,0 +1,286 @@
+# -- Specify rather or not helm should create the secret described in `secret-env.yaml` template
+secretEnv:
+  # -- Change to false in order to support externally created secret (Binami "Sealed Secrets" for Kubernetes or External Secrets Operator)
+  # note: when externally creating the secret, the chart still expects to pull values from a secret with the name of the release defaults to `release-name-superset-env` - full logic located in _helpers.tpl file: `define "superset.fullname"`
+  create: false
+
+# -- Specify service account name to be used
+serviceAccountName: superset-sa # This name should match with name of IAM trust policy
+serviceAccount:
+  # -- Create custom service account for Superset. If create: true and serviceAccountName is not provided, `superset.fullname` will be used.
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: <your_IRSA_role_arn>
+
+# -- The name of the secret which we will use to populate env vars in deployed pods
+# This can be useful for secret keys, etc.
+# envFromSecret: '{{ template "superset.fullname" . }}-env'
+envFromSecret: '{{ template "superset.fullname" . }}-config' # we need to use '-config' prefix because we are setting secretEnv.create to false
+
+
+# -- Extra environment variables that will be passed into pods
+extraEnv:
+  REDIS_HOST: "<your_redis_db_endpoint>"
+  REDIS_PORT: "6379"
+  REDIS_DB: "1"
+  REDIS_CELERY_DB: "0"
+  REDIS_PROTO: "redis"
+  SUPERSET_LOG_LEVEL: "info"
+  DB_NAME: "<your_superset_db>" # This should be name of existing database
+  SUPERSET_CONFIG_PATH: /app/superset_config.py
+
+
+# -- Extra environment variables in RAW format that will be passed into pods
+extraEnvRaw:
+  - name: DB_PASS
+    valueFrom:
+      secretKeyRef:
+        name: superset-secret-csi-opaque # name of k8s secret, this should match with name provided in SecretProviderClass Object
+        key: password
+  - name: DB_USER
+    valueFrom:
+      secretKeyRef:
+        name: superset-secret-csi-opaque # name of k8s secret, this should match with name provided in SecretProviderClass Object
+        key: username
+  - name: DB_HOST
+    valueFrom:
+      secretKeyRef:
+        name: superset-secret-csi-opaque # name of k8s secret, this should match with name provided in SecretProviderClass Object
+        key: host
+  - name: DB_PORT
+    valueFrom:
+      secretKeyRef:
+        name: superset-secret-csi-opaque # name of k8s secret, this should match with name provided in SecretProviderClass Object
+        key: port
+  - name: SUPERSET_SECRET_KEY
+    valueFrom:
+      secretKeyRef:
+        name: superset-secret-csi-opaque # name of k8s secret, this should match with name provided in SecretProviderClass Object
+        key: superset_secret_key
+  - name: SUPERSET_ADMIN_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: superset-secret-csi-opaque # name of k8s secret, this should match with name provided in SecretProviderClass Object
+        key: superset_admin_username
+  - name: SUPERSET_ADMIN_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: superset-secret-csi-opaque # name of k8s secret, this should match with name provided in SecretProviderClass Object
+        key: superset_admin_password
+
+
+extraVolumes:
+  - csi:
+      driver: secrets-store.csi.k8s.io
+      readOnly: true
+      volumeAttributes:
+        secretProviderClass: superset-secrets-store # name of SecretProviderClass object
+    name: awareintegrationsecretsmanager
+
+extraVolumeMounts:
+  - name: awareintegrationsecretsmanager
+    mountPath: /mnt/secrets
+    readOnly: true
+
+
+image:
+  repository: <your_ecr_url>
+  tag: <your_image_tag>
+  pullPolicy: IfNotPresent
+
+
+ingress:
+  enabled: true
+  ingressClassName: nginx # your ingress class name
+  annotations:
+    # kubernetes.io/tls-acme: "true"
+    ## Extend timeout to allow long running queries.
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+  path: /
+  pathType: ImplementationSpecific
+  hosts:
+    - localhost
+  tls: []
+  extraHostsRaw: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+
+# Superset node configuration
+supersetNode:
+  replicas:
+    enabled: true
+    replicaCount: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 60
+    targetMemoryUtilizationPercentage: 60
+  
+  # -- Init containers
+  # @default -- a container waiting for postgres
+  initContainers:
+    - name: wait-for-postgres
+      image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag }}"
+      imagePullPolicy: "{{ .Values.initImage.pullPolicy }}"
+      env:
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              key: host
+              name: superset-secret-csi-opaque # name of k8s secret, this should match with name provided in SecretProviderClass Object
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              key: port
+              name: superset-secret-csi-opaque # name of k8s secret, this should match with name provided in SecretProviderClass Object
+      envFrom:
+        - secretRef:
+            name: "{{ tpl .Values.envFromSecret . }}"
+      command:
+        - /bin/sh
+        - -c
+        - dockerize -wait "tcp://$DB_HOST:$DB_PORT" -timeout 120s
+      volumeMounts:
+        - name: awareintegrationsecretsmanager
+          mountPath: /mnt/secrets
+          readOnly: true
+
+
+# Superset Celery worker configuration
+supersetWorker:
+  replicas:
+    enabled: true
+    replicaCount: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 60
+    targetMemoryUtilizationPercentage: 60
+  # -- Init container
+  # @default -- a container waiting for postgres and redis
+  initContainers:
+    - name: wait-for-postgres-redis
+      image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag }}"
+      imagePullPolicy: "{{ .Values.initImage.pullPolicy }}"
+      env:
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              key: host
+              name: superset-secret-csi-opaque # name of k8s secret, this should match with name provided in SecretProviderClass Object
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              key: port
+              name: superset-secret-csi-opaque # name of k8s secret, this should match with name provided in SecretProviderClass Object
+        - name: REDIS_HOST
+          value: "{{ tpl .Values.extraEnv.REDIS_HOST . }}"
+        - name: REDIS_PORT
+          value: "{{ tpl .Values.extraEnv.REDIS_PORT . }}"
+      envFrom:
+        - secretRef:
+            name: "{{ tpl .Values.envFromSecret . }}"
+      command:
+        - /bin/sh
+        - -c
+        - dockerize -wait "tcp://$DB_HOST:$DB_PORT" -wait "tcp://$REDIS_HOST:$REDIS_PORT" -timeout 120s
+      volumeMounts:
+        - name: awareintegrationsecretsmanager
+          mountPath: /mnt/secrets
+          readOnly: true
+
+# Superset beat configuration (to trigger scheduled jobs like reports)
+supersetCeleryBeat:
+  # -- This is only required if you intend to use alerts and reports
+  enabled: true
+  # -- List of init containers
+  # @default -- a container waiting for postgres
+  initContainers:
+    - name: wait-for-postgres-redis
+      image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag }}"
+      imagePullPolicy: "{{ .Values.initImage.pullPolicy }}"
+      env:
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              key: host
+              name: superset-secret-csi-opaque # name of k8s secret, this should match with name provided in SecretProviderClass Object
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              key: port
+              name: superset-secret-csi-opaque # name of k8s secret, this should match with name provided in SecretProviderClass Object
+        - name: REDIS_HOST
+          value: "{{ tpl .Values.extraEnv.REDIS_HOST . }}"
+        - name: REDIS_PORT
+          value: "{{ tpl .Values.extraEnv.REDIS_PORT . }}"
+      envFrom:
+        - secretRef:
+            name: "{{ tpl .Values.envFromSecret . }}"
+      command:
+        - /bin/sh
+        - -c
+        - dockerize -wait "tcp://$DB_HOST:$DB_PORT" -wait "tcp://$REDIS_HOST:$REDIS_PORT" -timeout 120s
+      volumeMounts:
+        - name: awareintegrationsecretsmanager
+          mountPath: /mnt/secrets
+          readOnly: true
+
+init:
+  loadExamples: false
+  createAdmin: true
+  adminUser:
+    username: krishna
+    firstname: Superset
+    lastname: Admin
+    email: krishna@dayone.dev # your admin email id
+    password: ThisIsMyPa$word!
+  # -- List of initContainers
+  # @default -- a container waiting for postgres
+  initContainers:
+    - name: wait-for-postgres
+      image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag }}"
+      imagePullPolicy: "{{ .Values.initImage.pullPolicy }}"
+      env:
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              key: host
+              name: superset-secret-csi-opaque # name of k8s secret, this should match with name provided in SecretProviderClass Object
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              key: port
+              name: superset-secret-csi-opaque # name of k8s secret, this should match with name provided in SecretProviderClass Object
+      envFrom:
+        - secretRef:
+            name: "{{ tpl .Values.envFromSecret . }}"
+      command:
+        - /bin/sh
+        - -c
+        - dockerize -wait "tcp://$DB_HOST:$DB_PORT" -timeout 120s
+      volumeMounts:
+        - name: awareintegrationsecretsmanager
+          mountPath: /mnt/secrets
+          readOnly: true
+
+postgresql:
+  ##
+  ## Use the PostgreSQL chart dependency.
+  ## Set to false if bringing your own PostgreSQL.
+  enabled: true
+
+redis:
+  ##
+  ## Use the redis chart dependency.
+  ##
+  ## If you are bringing your own redis, you can set the host in supersetNode.connections.redis_host
+  ##
+  ## Set to false if bringing your own redis.
+  enabled: true

@@ -20,7 +20,7 @@ rabbitmq:
 distribution:
   enabled: false
 insight:
-  enabled: false
+  enabled: true
 pipelines:
   enabled: false
 worker:

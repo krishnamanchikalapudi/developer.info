@@ -1,5 +1,5 @@
 #!/bin/bash
-arg=${1}
+arg=${1:-"INSTALL"}
 DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 # https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands
 NAMESPACE_PLATFORM="jfrog-platform"
@@ -20,17 +20,6 @@ prestep() {
     helm show chart jfrog/jfrog-platform | yq '.dependencies[] | "\(.name): \(.version)"' | sed -E '/^(worker|artifactory|xray|distribution|catalog):/s/^([^:]+): 10([0-9]+\..*)$/\1: \2/'
 }
 
-
-platform-install-with-defaults() {
-    printf "\n ----------------------------------------------------------------  "
-    printf "\n ------------   INSTALLING... JFrog Platform on K8S  ------------  "
-    printf "\n ------------         WITH DEFAULTS VALUES           ------------  "
-    printf "\n ----------------------------------------------------------------  \n"
-    prestep
-        # https://jfrog.com/help/r/jfrog-installation-setup-documentation/jfrog-platform-helm-chart-installation-steps
-    helm upgrade --install ${NAMESPACE_PLATFORM} --namespace ${NAMESPACE_PLATFORM} --create-namespace jfrog/${NAMESPACE_PLATFORM}
-}
-
 platform-install-rt(){
     printf "\n ----------------------------------------------------------------  "
     printf "\n ------------  INSTALLING... JFrog Platform on K8S  ------------  "
@@ -38,17 +27,7 @@ platform-install-rt(){
     printf "\n ----------------------------------------------------------------  \n"
     prestep
         # https://jfrog.com/help/r/jfrog-installation-setup-documentation/jfrog-platform-helm-chart-installation-steps
-    helm upgrade --install ${NAMESPACE_PLATFORM} --namespace ${NAMESPACE_PLATFORM} --create-namespace jfrog/${NAMESPACE_PLATFORM} -f ./RT-custom-values.yml
-}
-
-platform-install-rt-xray(){
-    printf "\n ----------------------------------------------------------------  "
-    printf "\n ------------  INSTALLING... JFrog Platform on K8S  ------------  "
-    printf "\n ------------          ARTIFACTORY & XRAY           ------------  "
-    printf "\n ----------------------------------------------------------------  \n"
-    prestep
-        # https://jfrog.com/help/r/jfrog-installation-setup-documentation/jfrog-platform-helm-chart-installation-steps
-    helm upgrade --install ${NAMESPACE_PLATFORM} --namespace ${NAMESPACE_PLATFORM} --create-namespace jfrog/${NAMESPACE_PLATFORM} -f ./RT-XRAY-custom-values.yml
+    helm upgrade --install ${NAMESPACE_PLATFORM} --namespace ${NAMESPACE_PLATFORM} --create-namespace jfrog/${NAMESPACE_PLATFORM} -f ./rt-values.yml
 }
 
 pv_reclaim(){
@@ -134,7 +113,7 @@ gen-template(){
 # Check for 1 argument
 if [ $# -ne 1 ]; then
   echo "Error: This script requires exactly 1 argument."
-  echo "    ./platform.sh <install | info | delete> "
+  echo "    ./platform-rt.sh <install | info | delete> "
   echo ""
     echo "Commands:"
     echo "  install  - Install JFrog Artifactory on Kubernetes (minikube)"
@@ -145,7 +124,7 @@ fi
 # -z option with $1, if the first argument is NULL. Set to default
 if  [[ -z "$1" ]] ; then # check for null
     echo "User action is NULL, setting to default INSTALL"
-    arg='INSTALL'
+    arg='INSTALL' # 'INSTALL'
 fi
 
 # -n string - True if the string length is non-zero.
@@ -156,16 +135,8 @@ if [[ -n $arg ]] ; then
     echo "User Action: ${arg}, and arg length: ${arg_len}"
     
     prestep
-    if [[ "INSTALL" == "${arg}" ]] || [[ "DEPLOY" == "${arg}" ]] || [[ "START" == "${arg}" ]] ; then   # Download & install 
-        platform-install-with-defaults
-        sleep 5
-        platform-serviceInfo
-    elif [[ "RT-INSTALL" == "${arg}" ]] || [[ "RT-DEPLOY" == "${arg}" ]] || [[ "RT-START" == "${arg}" ]] ; then 
-        platform-install-rt
-        sleep 5
-        platform-serviceInfo
-    elif [[ "RT-XRAY-INSTALL" == "${arg}" ]] || [[ "RT-XRAY-DEPLOY" == "${arg}" ]] || [[ "RT-XRAY-START" == "${arg}" ]] ; then 
-        platform-install-rt-xray
+    if [[ "INSTALL" == "${arg}" ]] || [[ "DEPLOY" == "${arg}" ]] || [[ "START" == "${arg}" ]] || [[ "RT-INSTALL" == "${arg}" ]] || [[ "RT-DEPLOY" == "${arg}" ]] || [[ "RT-START" == "${arg}" ]] ; then   # Download & install 
+        platform-install-rt  # Install Artifactory only
         sleep 5
         platform-serviceInfo
     elif [[ "DELETE" == "${arg}" ]] || [[ "STOP" == "${arg}" ]] || [[ "UNINSTALL" == "${arg}" ]] || [[ "UNDEPLOY" == "${arg}" ]] || [[ "CLEAN" == "${arg}" ]] ; then 

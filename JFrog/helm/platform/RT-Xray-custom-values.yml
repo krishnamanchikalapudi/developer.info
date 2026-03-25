@@ -5,7 +5,13 @@ postgresql:
   enabled: true
 artifactory:
   enabled: true
-  splitServicesToContainers: true
+  artifactory:
+    ## NOTE: For HA deployments, set replicaCount > 1 (recommended 3) and add env var JF_SHARED_NODE_HAENABLED=true
+    replicaCount: 2
+    extraEnvironmentVariables:
+    - name : JF_SHARED_NODE_HAENABLED
+      value: "true"
+    splitServicesToContainers: true
 xray:
   enabled: true
 # If enabling Xray, rabbitmq should also be enabled
