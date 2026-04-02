@@ -1,6 +1,4 @@
 #!/bin/bash
-arg=${1:-"INSTALL"}
-DATE_TIME=`date '+%Y-%m-%d %H:%M:%S'`
 # https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands
 NAMESPACE_PLATFORM="jfrog-platform"
 EXTERNAL_DB_NAMESPACE="postgresql" # "true"
@@ -78,23 +76,29 @@ platform-serviceInfo() {
     export DB_PWD=$(kubectl get secrets ${NAMESPACE_PLATFORM}-artifactory-unified-secret -n ${NAMESPACE_PLATFORM} -o jsonpath='{.data.db-password}' | base64 --decode)
     export DB_URL=$(kubectl get secrets ${NAMESPACE_PLATFORM}-artifactory-unified-secret -n ${NAMESPACE_PLATFORM} -o jsonpath='{.data.db-url}' | base64 --decode)
     export DB_USER=$(kubectl get secrets ${NAMESPACE_PLATFORM}-artifactory-unified-secret -n ${NAMESPACE_PLATFORM} -o jsonpath='{.data.db-user}' | base64 --decode)
-    printf "\n\nDatabase Port: ${NODE_PORT_HTTP}   JDBC DB URI: jdbc:postgresql://localhost:5432/artifactory   \n"
+
+    export NODE_PORT_HTTP=$(kubectl get svc -n ${NAMESPACE_PLATFORM} ${NAMESPACE_PLATFORM}-artifactory-nginx -o jsonpath='{.spec.ports[0].nodePort}')
+    export NODE_PORT_HTTPS=$(kubectl get svc -n ${NAMESPACE_PLATFORM} ${NAMESPACE_PLATFORM}-artifactory-nginx -o jsonpath='{.spec.ports[1].nodePort}')
+
+    printf "\n\nPostgreSQL (port-forward above): localhost:5432   JDBC: jdbc:postgresql://localhost:5432/artifactory\n"
     printf "kubectl exec -it svc/${NAMESPACE_PLATFORM}-postgresql  -n ${NAMESPACE_PLATFORM} -- psql -d artifactory -U ${DB_USER} \n"
     printf "DB Defaults; DB: ${DB_URL}  username: ${DB_USER}    password: ${DB_PWD} \n\n"
-    
-    export NODE_PORT_HTTP=$(kubectl get svc -n ${NAMESPACE_PLATFORM} ${NAMESPACE_PLATFORM}-artifactory-nginx -o jsonpath='{.spec.ports[0].nodePort}') 
-    export NODE_PORT_HTTPS=$(kubectl get svc -n ${NAMESPACE_PLATFORM} ${NAMESPACE_PLATFORM}-artifactory-nginx -o jsonpath='{.spec.ports[1].nodePort}') 
     printf "\n\nHTTP Port: ${NODE_PORT_HTTP}      Browser URI: http://localhost:${NODE_PORT_HTTP}\n"
     printf "HTTPS Port: ${NODE_PORT_HTTPS}     Browser URI: https://localhost:${NODE_PORT_HTTPS}\n"
     printf "UI Defaults; username: admin    password: password \n\n" 
 
-    # run in loop to get curl status code 200
+    # run in loop until HTTP 200 on nginx NodePort (HTTP then HTTPS)
     while true; do
         kubectl get pvc,endpoints,pods,svc,rs,statefulset,deploy -n ${NAMESPACE_PLATFORM} && printf "\n"
-        curl -k https://localhost:${NODE_PORT_HTTP} -o /dev/null -w "%{http_code}" && break
+        code=$(curl -k -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${NODE_PORT_HTTP}" || true)
+        if [[ "$code" == "200" ]]; then
+            break
+        fi
+        code=$(curl -k -s -o /dev/null -w "%{http_code}" "https://127.0.0.1:${NODE_PORT_HTTPS}" || true)
+        [[ "$code" == "200" ]] && break
         sleep 15
     done
-    printf "\n\nJFrog Platform: Service is ready at https://localhost:${NODE_PORT_HTTP} \n\n"
+    printf "\n\nJFrog Platform: Service is ready — http://127.0.0.1:%s  https://127.0.0.1:%s \n\n" "${NODE_PORT_HTTP}" "${NODE_PORT_HTTPS}"
 
 }
 
@@ -105,37 +109,30 @@ gen-template(){
     prestep
      # Install the chart with the release name  artifactory and with master key and join key.
     # helm upgrade --install jfrog-platform --namespace jfrog-platform --create-namespace jfrog/jfrog-platform --dry-run=client -o yaml > ./generated-template-values.yml
-    helm upgrade --install ${NAMESPACE_PLATFORM} --namespace ${NAMESPACE_PLATFORM} --create-namespace jfrog/${NAMESPACE_PLATFORM} --dry-run=client -o yaml > ./generated-template-values.yml
+    helm upgrade --install ${NAMESPACE_PLATFORM} --namespace ${NAMESPACE_PLATFORM} --create-namespace jfrog/${NAMESPACE_PLATFORM} -f ./rt-values.yml --dry-run=client -o yaml > ./generated-template-values.yml
 }
 
 
 
-# Check for 1 argument
-if [ $# -ne 1 ]; then
-  echo "Error: This script requires exactly 1 argument."
-  echo "    ./platform-rt.sh <install | info | delete> "
+if [ $# -gt 1 ]; then
+  echo "Error: at most one argument."
+  echo "    ./platform-rt.sh [install | info | delete | dryrun | ...]"
   echo ""
-    echo "Commands:"
-    echo "  install  - Install JFrog Artifactory on Kubernetes (minikube)"
-    echo "  info     - Show service information and URLs"
-    echo "  test     - Test connectivity to Artifactory service"
-    echo "  delete   - Uninstall and clean up Artifactory"
-fi
-# -z option with $1, if the first argument is NULL. Set to default
-if  [[ -z "$1" ]] ; then # check for null
-    echo "User action is NULL, setting to default INSTALL"
-    arg='INSTALL' # 'INSTALL'
+  echo "Commands:"
+  echo "  install, deploy, start, rt-install  - Install with ./rt-values.yml"
+  echo "  info     - Show service information and URLs"
+  echo "  delete   - Uninstall and clean up"
+  exit 1
 fi
 
-# -n string - True if the string length is non-zero.
+arg=${1:-INSTALL}
+
 if [[ -n $arg ]] ; then
     arg_len=${#arg}
-    # uppercase the argument
-    arg=$(echo ${arg} | tr [a-z] [A-Z] | xargs)
+    arg=$(echo "${arg}" | tr '[:lower:]' '[:upper:]' | xargs)
     echo "User Action: ${arg}, and arg length: ${arg_len}"
-    
-    prestep
-    if [[ "INSTALL" == "${arg}" ]] || [[ "DEPLOY" == "${arg}" ]] || [[ "START" == "${arg}" ]] || [[ "RT-INSTALL" == "${arg}" ]] || [[ "RT-DEPLOY" == "${arg}" ]] || [[ "RT-START" == "${arg}" ]] ; then   # Download & install 
+
+    if [[ "INSTALL" == "${arg}" ]] || [[ "DEPLOY" == "${arg}" ]] || [[ "START" == "${arg}" ]] || [[ "RT-INSTALL" == "${arg}" ]] || [[ "RT-DEPLOY" == "${arg}" ]] || [[ "RT-START" == "${arg}" ]] ; then
         platform-install-rt  # Install Artifactory only
         sleep 5
         platform-serviceInfo

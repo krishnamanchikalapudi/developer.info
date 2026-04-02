@@ -77,7 +77,8 @@ minikube-info(){
 
     kubectl get ns -o wide 
     printf "\n"
-    kubectl get pods,svc,deploy,pv,pvc --all-namespaces -o wide 
+    kubectl get pods,svc,deploy,pv,pvc,endpoints --all-namespaces -o wide 
+
     printf "\n"
 
     minikube dashboard &
