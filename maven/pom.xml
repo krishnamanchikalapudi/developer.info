@@ -11,7 +11,7 @@
 		<reports.outputDirectory>${basedir}/target/reports</reports.outputDirectory>
 		<spring.version>2.5.12</spring.version>
 		<jackson.dataformat.version>2.9.8</jackson.dataformat.version>
-		<swagger2.version>2.9.2</swagger2.version>
+		<swagger2.version>2.10.0</swagger2.version>
 
 		<plugin.docker.version>0.21.0</plugin.docker.version>
 		<plugin.spotbugs.version>3.1.9</plugin.spotbugs.version>
